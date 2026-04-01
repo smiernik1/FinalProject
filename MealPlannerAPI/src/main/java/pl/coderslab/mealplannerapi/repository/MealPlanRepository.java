@@ -5,5 +5,5 @@ import org.springframework.stereotype.Repository;
 import pl.coderslab.mealplannerapi.entity.MealPlan;
 
 @Repository
-public interface MealRepository extends JpaRepository<MealPlan,Long> {
+public interface MealPlanRepository extends JpaRepository<MealPlan,Long> {
 }

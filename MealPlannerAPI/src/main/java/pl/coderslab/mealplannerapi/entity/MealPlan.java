@@ -37,6 +37,7 @@ public class MealPlan {
     )
     private Set<Recipe> recipes = new HashSet<>();
 
+    //Relacja @ManyToOne z User
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
