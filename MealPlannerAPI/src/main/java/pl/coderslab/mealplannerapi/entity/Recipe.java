@@ -5,6 +5,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Entity
 @Table(name="recipes")
 @Getter
@@ -24,4 +27,8 @@ public class Recipe {
         this.calories = calories;
         this.category = category;
     }
+
+    //relacja @OneToMany z RecipeIngredient
+    @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<RecipeIngredient> ingredients = new HashSet<>();
 }
