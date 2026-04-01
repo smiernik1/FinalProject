@@ -9,24 +9,22 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(name="recipes")
+@Table(name="categories")
 @Getter
 @Setter
 @NoArgsConstructor
-public class Recipe {
+public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private String name;
-    private Integer calories;
-
-    public Recipe(String name, Integer calories) {
-        this.name = name;
-        this.calories = calories;
-    }
 
     //Relacja @OneToMany z RecipeIngredient
-    @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<RecipeIngredient> ingredients = new HashSet<>();
+    @ManyToMany
+    @JoinTable(
+            name = "category_recipe",
+            joinColumns = @JoinColumn(name = "category_id"),
+            inverseJoinColumns = @JoinColumn(name = "recipe_id")
+    )
+    private Set<Recipe> recipes = new HashSet<>();
 }

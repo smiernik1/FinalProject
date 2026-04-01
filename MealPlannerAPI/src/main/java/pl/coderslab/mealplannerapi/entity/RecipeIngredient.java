@@ -22,12 +22,12 @@ public class RecipeIngredient {
         this.amount = amount;
     }
 
-    //relacja @ManyToOne z Recipe
+    //Relacja @ManyToOne z Recipe
     @ManyToOne
     @JoinColumn(name = "recipe_id")
     private Recipe recipe;
 
-    //relacja @ManyToOne z Ingredients
+    //Relacja @ManyToOne z Ingredients
     @ManyToOne
     @JoinColumn(name = "ingredient_id")
     private Ingredient ingredient;
