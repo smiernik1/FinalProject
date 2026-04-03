@@ -7,12 +7,17 @@ import org.springframework.stereotype.Repository;
 import pl.coderslab.mealplannerapi.entity.Recipe;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface RecipeRepository extends JpaRepository<Recipe,Long> {
 
-    @Query("SELECT r FROM Recipe r JOIN r.categories c WHERE c.name = :name")
-    List<Recipe> findByCategoryName(@Param("name") String categoryName);
+    Optional<Recipe> findByExternalId(Long externalId);
 
-    //List<Recipe> findByCaloriesBetween(int min, int max);
+//    @Query("SELECT r FROM Recipe r JOIN r.categories c WHERE c.name = :name")
+//    List<Recipe> findByCategoryName(@Param("name") String categoryName);
+//
+//    //List<Recipe> findByCaloriesBetween(int min, int max);
+//
+//    Optional<Recipe> findByName(String name);
 }

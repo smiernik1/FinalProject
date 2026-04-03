@@ -1,34 +1,35 @@
 package pl.coderslab.mealplannerapi.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+
+import java.math.BigDecimal;
 
 @Entity
 @Table(name="recipe_ingredients")
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class RecipeIngredient {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private Double amount;
 
-    public RecipeIngredient(Recipe recipe, Ingredient ingredient, Double amount) {
-        this.recipe = recipe;
-        this.ingredient = ingredient;
-        this.amount = amount;
-    }
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal amount;
+
+    @Column(nullable = false)
+    private String unit;
 
     //Relacja @ManyToOne z Recipe
-    @ManyToOne
+    @ManyToOne (fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "recipe_id")
     private Recipe recipe;
 
     //Relacja @ManyToOne z Ingredients
-    @ManyToOne
+    @ManyToOne (fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "ingredient_id")
     private Ingredient ingredient;
 }
