@@ -1,12 +1,13 @@
 package pl.coderslab.mealplannerapi.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
 
 @Entity
-@Table(name="recipe_ingredients")
+@Table(name = "recipe_ingredients")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -24,12 +25,14 @@ public class RecipeIngredient {
     private String unit;
 
     //Relacja @ManyToOne z Recipe
-    @ManyToOne (fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "recipe_id")
+    @JsonIgnore
     private Recipe recipe;
 
     //Relacja @ManyToOne z Ingredients
-    @ManyToOne (fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "ingredient_id")
+    @JsonIgnore
     private Ingredient ingredient;
 }

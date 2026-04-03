@@ -1,0 +1,30 @@
+### Generate meal plan - valid request
+POST http://localhost:8080/api/meal-plans/generate
+Content-Type: application/json
+
+{
+  "daysCount": 2
+}
+
+### Generate meal plan - invalid request: null
+POST http://localhost:8080/api/meal-plans/generate
+Content-Type: application/json
+
+{
+}
+
+### Generate meal plan - invalid request: zero
+POST http://localhost:8080/api/meal-plans/generate
+Content-Type: application/json
+
+{
+  "daysCount": 0
+}
+
+### Generate meal plan - invalid request: too many days
+POST http://localhost:8080/api/meal-plans/generate
+Content-Type: application/json
+
+{
+  "daysCount": 23
+}

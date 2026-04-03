@@ -5,6 +5,8 @@ import org.springframework.web.client.RestTemplate;
 import pl.coderslab.mealplannerapi.dto.SpoonacularRecipeDTO;
 import pl.coderslab.mealplannerapi.dto.SpoonacularRecipeResponseDTO;
 
+import java.util.List;
+
 @Component
 public class SpoonacularClient {
 
@@ -40,6 +42,24 @@ public class SpoonacularClient {
                 throw new RuntimeException("Response do not contains recipes");
             }
             return response.getRecipes().get(0);
+        } catch (Exception e) {
+            throw new RuntimeException("Spoonacular API error", e);
+        }
+    }
+
+    public List<SpoonacularRecipeDTO> getRandomRecipes(int number) {
+        try {
+            RestTemplate restTemplate = UnsafeRestTemplate.create();
+            String url = properties.getBaseUrl()
+                    + "/recipes/random?number=" + number + "&apiKey="
+                    + properties.getApiKey();
+
+            SpoonacularRecipeResponseDTO response =  restTemplate.getForObject(url, SpoonacularRecipeResponseDTO.class);
+
+            if (response == null || response.getRecipes() == null || response.getRecipes().isEmpty()) {
+                throw new RuntimeException("Response do not contains recipes");
+            }
+            return response.getRecipes();
         } catch (Exception e) {
             throw new RuntimeException("Spoonacular API error", e);
         }
