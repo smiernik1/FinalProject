@@ -90,4 +90,14 @@ public class MealPlanService {
 
         return recipeRepository.save(recipe);
     }
+
+    public List<MealPlan> getAllMealPlans() {
+        return mealPlanRepository.findAll();
+    }
+
+    public MealPlan getMealPlanById(Long id) {
+        return mealPlanRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Can't find mealPlan with id: " + id));
+
+    }
 }
