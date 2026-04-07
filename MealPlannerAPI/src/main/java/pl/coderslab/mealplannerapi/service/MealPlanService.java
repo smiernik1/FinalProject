@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pl.coderslab.mealplannerapi.SpoonacularClient;
 import pl.coderslab.mealplannerapi.dto.CreateMealPlanRequestDTO;
+import pl.coderslab.mealplannerapi.dto.ShoppingListItemDTO;
 import pl.coderslab.mealplannerapi.dto.SpoonacularIngredientDTO;
 import pl.coderslab.mealplannerapi.dto.SpoonacularRecipeDTO;
 import pl.coderslab.mealplannerapi.entity.Ingredient;
@@ -17,7 +18,9 @@ import pl.coderslab.mealplannerapi.repository.RecipeRepository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class MealPlanService {
@@ -25,6 +28,7 @@ public class MealPlanService {
     private final SpoonacularClient spoonacularClient;
     private final RecipeRepository recipeRepository;
     private final IngredientRepository ingredientRepository;
+
     public MealPlanService(MealPlanRepository mealPlanRepository, SpoonacularClient spoonacularClient, RecipeRepository recipeRepository, IngredientRepository ingredientRepository) {
         this.mealPlanRepository = mealPlanRepository;
         this.spoonacularClient = spoonacularClient;
@@ -36,7 +40,7 @@ public class MealPlanService {
     public MealPlan generateMealPlan(CreateMealPlanRequestDTO request) {
         List<SpoonacularRecipeDTO> spoonacularRecipeDTO = spoonacularClient.getRandomRecipes(request.getDaysCount());
 
-        List<Recipe>  recipes = new ArrayList<>();
+        List<Recipe> recipes = new ArrayList<>();
 
         for (SpoonacularRecipeDTO recipeDTO : spoonacularRecipeDTO) {
             Recipe recipe = getOrSaveRecipe(recipeDTO);
@@ -57,7 +61,7 @@ public class MealPlanService {
     }
 
     private Recipe saveNewRecipe(SpoonacularRecipeDTO spoonacularRecipeDTO) {
-        Recipe recipe =  Recipe.builder()
+        Recipe recipe = Recipe.builder()
                 .externalId(spoonacularRecipeDTO.getId())
                 .name(spoonacularRecipeDTO.getTitle())
                 .imageUrl(spoonacularRecipeDTO.getImage())
@@ -65,7 +69,7 @@ public class MealPlanService {
                 .calories(null)
                 .build();
         if (spoonacularRecipeDTO.getExtendedIngredients() != null) {
-            for (SpoonacularIngredientDTO ingredientDTO : spoonacularRecipeDTO.getExtendedIngredients() ) {
+            for (SpoonacularIngredientDTO ingredientDTO : spoonacularRecipeDTO.getExtendedIngredients()) {
 
                 Ingredient ingredient = ingredientRepository
                         .findByNameIgnoreCase(ingredientDTO.getName())
@@ -100,4 +104,33 @@ public class MealPlanService {
                 .orElseThrow(() -> new RuntimeException("Can't find mealPlan with id: " + id));
 
     }
+
+    public List<ShoppingListItemDTO> getShoppingList(Long mealPlanId) {
+        MealPlan mealPlan = getMealPlanById(mealPlanId);
+
+        Map<String, BigDecimal> totals = new LinkedHashMap<>();
+
+        for (Recipe recipe : mealPlan.getRecipes()) {
+            for (RecipeIngredient recipeIngredient : recipe.getRecipeIngredients()) {
+                String ingredientName = recipeIngredient.getIngredient().getName();
+                String unit = recipeIngredient.getUnit();
+                BigDecimal amount = recipeIngredient.getAmount();
+
+                String key = ingredientName + ", " + unit;
+                totals.put(key, totals.getOrDefault(key, BigDecimal.ZERO).add(amount));
+            }
+        }
+
+        List<ShoppingListItemDTO> shoppingList = new ArrayList<>();
+        for (Map.Entry<String, BigDecimal> entry : totals.entrySet()) {
+            String[] parts = entry.getKey().split(", ");
+            String ingredientName = parts[0];
+            String unit = parts[1];
+            BigDecimal amount = entry.getValue();
+
+            shoppingList.add(new ShoppingListItemDTO(ingredientName, amount, unit));
+        }
+        return shoppingList;
+    }
+
 }

@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 import pl.coderslab.mealplannerapi.dto.CreateMealPlanRequestDTO;
+import pl.coderslab.mealplannerapi.dto.ShoppingListItemDTO;
 import pl.coderslab.mealplannerapi.entity.MealPlan;
 import pl.coderslab.mealplannerapi.service.MealPlanService;
 
@@ -33,4 +34,8 @@ public class MealPlanController {
         return mealPlanService.getMealPlanById(id);
     }
 
+    @GetMapping("/get/shopping-list/{id}")
+    public List<ShoppingListItemDTO> getShoppingList(@PathVariable Long id) {
+        return mealPlanService.getShoppingList(id);
+    }
 }
