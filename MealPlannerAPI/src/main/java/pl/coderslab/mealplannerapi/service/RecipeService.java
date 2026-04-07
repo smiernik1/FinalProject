@@ -21,4 +21,11 @@ public class RecipeService {
     public List<Recipe> getAllRecipes(){
         return recipeRepository.findAll();
     }
+
+    public void deleteRecipe(Long id){
+        if(!recipeRepository.existsById(id)){
+            throw new RuntimeException("Recipe not found");
+        }
+        recipeRepository.deleteById(id);
+    }
 }

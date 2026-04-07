@@ -1,10 +1,7 @@
 package pl.coderslab.mealplannerapi.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import pl.coderslab.mealplannerapi.entity.Recipe;
 import pl.coderslab.mealplannerapi.repository.RecipeRepository;
 import pl.coderslab.mealplannerapi.service.RecipeService;
@@ -26,5 +23,10 @@ public class RecipeController {
     @GetMapping("/get/all")
     public List<Recipe> getAllRecipes(){
         return recipeService.getAllRecipes();
+    }
+
+    @DeleteMapping("/delete/{id}")
+    public void deleteRecipeById(@PathVariable Long id){
+        recipeService.deleteRecipe(id);
     }
 }

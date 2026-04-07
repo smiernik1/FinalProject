@@ -105,6 +105,13 @@ public class MealPlanService {
 
     }
 
+    public void deleteMealPlanById(Long id) {
+        if (!mealPlanRepository.existsById(id)) {
+            throw new RuntimeException("Can't find mealPlan with id: " + id);
+        }
+        mealPlanRepository.deleteById(id);
+    }
+
     public List<ShoppingListItemDTO> getShoppingList(Long mealPlanId) {
         MealPlan mealPlan = getMealPlanById(mealPlanId);
 
