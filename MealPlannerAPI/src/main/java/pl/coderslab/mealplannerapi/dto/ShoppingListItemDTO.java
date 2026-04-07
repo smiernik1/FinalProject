@@ -12,7 +12,14 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ShoppingListItemDTO {
+    private Long id;
     private String ingredientName;
     private BigDecimal amount;
     private String unit;
+
+    public ShoppingListItemDTO(String ingredientName, BigDecimal amount, String unit) {
+    }
+
+    public ShoppingListItemDTO(Long id, BigDecimal amount, String ingredientName, String unit) {
+    }
 }
