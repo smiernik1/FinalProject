@@ -31,8 +31,8 @@ public class RecipeIngredient {
     private Recipe recipe;
 
     //Relacja @ManyToOne z Ingredients
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "ingredient_id")
-    @JsonIgnore
+    //@JsonIgnore
     private Ingredient ingredient;
 }

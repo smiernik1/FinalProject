@@ -124,6 +124,7 @@ async function fetchRecipeDetails(recipeId) {
         }
 
         const recipe = await response.json();
+        console.log("szczegóły przepisu: ", recipe);
         renderRecipeDetails(recipe);
     } catch (error) {
         console.error(error);
@@ -135,35 +136,41 @@ async function fetchRecipeDetails(recipeId) {
 function renderRecipeDetails(recipe) {
     recipeDetailsSection.classList.remove("hidden");
 
+    console.log("renderuję szczegóły przepisu:", recipe);
+
+    const recipeName = recipe.name || "Brak nazwy";
+    const sourceUrl = recipe.sourceUrl || null;
+    const imageUrl = recipe.imageUrl || null;
+    const recipeIngredients = recipe.recipeIngredients || [];
+
     let ingredientsHtml = "<p>Brak składników.</p>";
 
-    if (recipe.recipeIngredients && recipe.recipeIngredients.length > 0) {
-        const items = recipe.recipeIngredients.map((item) => {
+    if (recipeIngredients.length > 0) {
+        const items = recipeIngredients.map((item) => {
             const ingredientName =
-                item.ingredient?.name ??
-                item.ingredientName ??
-                `Składnik ID: ${item.ingredient?.id ?? "-"}`;
+                item.ingredient && item.ingredient.name
+                    ? item.ingredient.name
+                    : "Brak nazwy składnika";
 
-            return `
-                <li>
-                    ${ingredientName} - ${item.amount ?? 0} ${item.unit ?? ""}
-                </li>
-            `;
+            const amount = item.amount ?? 0;
+            const unit = item.unit ?? "";
+
+            return `<li>${ingredientName} - ${amount} ${unit}</li>`;
         }).join("");
 
         ingredientsHtml = `<ul class="recipe-details-list">${items}</ul>`;
     }
 
     recipeDetails.innerHTML = `
-        <p><strong>Nazwa:</strong> ${recipe.name ?? "-"}</p>
+        <p><strong>Nazwa:</strong> ${recipeName}</p>
         <p><strong>Źródło:</strong> ${
-        recipe.sourceUrl
-            ? `<a href="${recipe.sourceUrl}" target="_blank">Zobacz przepis</a>`
+        sourceUrl
+            ? `<a href="${sourceUrl}" target="_blank">Zobacz przepis</a>`
             : "-"
     }</p>
         <p><strong>Obrazek:</strong> ${
-        recipe.imageUrl
-            ? `<a href="${recipe.imageUrl}" target="_blank">Podgląd obrazka</a>`
+        imageUrl
+            ? `<a href="${imageUrl}" target="_blank">Podgląd obrazka</a>`
             : "-"
     }</p>
         <h3>Składniki</h3>

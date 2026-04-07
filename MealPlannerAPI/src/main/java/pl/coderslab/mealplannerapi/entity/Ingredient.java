@@ -27,6 +27,7 @@ public class Ingredient {
     private String name;
 
     @OneToMany(mappedBy = "ingredient")
+    @JsonIgnore
     @Builder.Default
     private List<RecipeIngredient> recipeIngredients = new ArrayList<>();
 }
