@@ -9,7 +9,7 @@ import pl.coderslab.mealplannerapi.service.RecipeService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/recipe")
+@RequestMapping("/api/recipes")
 public class RecipeController {
 
     @Autowired

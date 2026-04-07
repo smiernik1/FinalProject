@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-widith, initial-scale=1.0">
+    <title>Meal Planner</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+    <h1> Meal Planner</h1>
+    <p class="subtitle">Wpisz liczbę dni i wygeneruj plan obiadów.</p>
+
+    <section class="card">
+        <h2> Generowanie meal planu </h2>
+        <form id="meal-plan-form">
+            <label for="daysCount">Liczba dni:</label>
+            <input type="number" id="daysCount" name="daysCount" min="1" max="14" required>
+            <button type="submit">Generuj meal plan</button>
+        </form>
+        <p id="message"></p>
+    </section>
+
+    <section class="card hidden" id="meal-plan-section">
+        <div class="section-header">
+            <h2> Wygenerowany meal plan </h2>
+            <button id="shopping-list-button" type="button">Pokaż listę zakupów</button>
+        </div>
+        <div id="meal-plan-info"></div>
+        <div id="recipes-list"></div>
+    </section>
+
+    <section class="card hidden" id="recipe-details-section">
+        <h2>Szczegóły przepisu</h2>
+        <div id="recipes-details"></div>
+    </section>
+
+    <section class="card hidden" id="shopping-list-section">
+        <h2>Lista zakupów</h2>
+        <div id="shopping-list"></div>
+    </section>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
