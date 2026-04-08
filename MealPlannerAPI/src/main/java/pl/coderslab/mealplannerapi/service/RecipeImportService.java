@@ -38,10 +38,6 @@ public class RecipeImportService {
                 .imageUrl(spoonacularRecipeDTO.getImage())
                 .sourceUrl(spoonacularRecipeDTO.getSourceUrl())
                 .calories(null)
-                .vegan(spoonacularRecipeDTO.getVegan())
-                .vegetarian(spoonacularRecipeDTO.getVegetarian())
-                .dairyFree(spoonacularRecipeDTO.getDairyFree())
-                .glutenFree(spoonacularRecipeDTO.getGlutenFree())
                 .build();
         if (spoonacularRecipeDTO.getExtendedIngredients() != null) {
             for (SpoonacularIngredientDTO ingredientDTO : spoonacularRecipeDTO.getExtendedIngredients() ) {

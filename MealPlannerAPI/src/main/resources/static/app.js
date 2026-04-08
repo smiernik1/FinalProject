@@ -27,6 +27,7 @@ form.addEventListener("submit", async (event) => {
     event.preventDefault();
 
     const daysCount = Number(daysCountInput.value);
+    const diet = form.querySelector('input[name="diet"]:checked').value;
 
     messageEl.textContent = "Trwa generowanie meal planu...";
     recipeDetailsSection.classList.add("hidden");
@@ -38,7 +39,7 @@ form.addEventListener("submit", async (event) => {
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({ daysCount })
+            body: JSON.stringify({ daysCount, diet })
         });
 
         if (!response.ok) {

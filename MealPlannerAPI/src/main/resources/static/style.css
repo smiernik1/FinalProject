@@ -38,9 +38,21 @@ h1 {
 
 form {
     display: flex;
+    flex-direction: column;
     gap: 12px;
-    align-items: end;
-    flex-wrap: wrap;
+    align-items: flex-start;
+}
+
+.days-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.diet-row {
+    display: flex;
+    align-items: center;
+    gap: 15px;
 }
 
 label {

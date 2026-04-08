@@ -38,7 +38,16 @@ public class MealPlanService {
 
     @Transactional
     public MealPlan generateMealPlan(CreateMealPlanRequestDTO request) {
-        List<SpoonacularRecipeDTO> spoonacularRecipeDTO = spoonacularClient.getRandomRecipes(request.getDaysCount());
+
+        List<SpoonacularRecipeDTO> spoonacularRecipeDTO;
+
+        // jeśli dieta jest ustawiona, filtruj przepisy po diecie
+        if (request.getDiet() != null && !request.getDiet().isEmpty()) {
+            spoonacularRecipeDTO = spoonacularClient.getRandomRecipesByDiets(request.getDiet(), request.getDaysCount());
+        } else {
+            // inaczej pobierz losowe przepisy bez filtra
+            spoonacularRecipeDTO = spoonacularClient.getRandomRecipes(request.getDaysCount());
+        }
 
         List<Recipe> recipes = new ArrayList<>();
 

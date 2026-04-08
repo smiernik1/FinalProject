@@ -19,10 +19,10 @@ public class SpoonacularRecipeDTO {
     Integer readyInMinutes;
     Integer servings;
 
-    Boolean vegetarian;
-    Boolean vegan;
-    Boolean glutenFree;
-    Boolean dairyFree;
+//    Boolean vegetarian;
+//    Boolean vegan;
+//    Boolean glutenFree;
+//    Boolean dairyFree;
 
     List<SpoonacularIngredientDTO> extendedIngredients;
 

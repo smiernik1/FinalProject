@@ -64,4 +64,23 @@ public class SpoonacularClient {
             throw new RuntimeException("Spoonacular API error", e);
         }
     }
+
+    public List<SpoonacularRecipeDTO> getRandomRecipesByDiets(String diet, int number) {
+        try {
+            RestTemplate restTemplate = UnsafeRestTemplate.create();
+            String url = properties.getBaseUrl()
+                    + "/recipes/random?number=" + number
+                    + "&diet=" + diet
+                    + "&apiKey=" + properties.getApiKey();
+
+            SpoonacularRecipeResponseDTO response =  restTemplate.getForObject(url, SpoonacularRecipeResponseDTO.class);
+
+            if (response == null || response.getRecipes() == null || response.getRecipes().isEmpty()) {
+                throw new RuntimeException("Response do not contains recipes");
+            }
+            return response.getRecipes();
+        } catch (Exception e) {
+            throw new RuntimeException("Spoonacular API error", e);
+        }
+    }
 }
