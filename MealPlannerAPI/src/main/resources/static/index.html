@@ -21,10 +21,20 @@
         <p id="message"></p>
     </section>
 
+    <section class="card">
+        <h2>Istniejące meal plany</h2>
+
+        <button id="load-meal-plans-button" type="button">
+            Pokaż zapisane meal plany
+        </button>
+
+        <div id="meal-plans-list"></div>
+    </section>
+
     <section class="card hidden" id="meal-plan-section">
         <div class="section-header">
             <h2> Wygenerowany meal plan </h2>
-            <button id="shopping-list-button" type="button">Pokaż listę zakupów</button>
+            <button id="shopping-list-button" type="button">Lista zakupów</button>
         </div>
         <div id="meal-plan-info"></div>
         <div id="recipes-list"></div>
@@ -36,7 +46,13 @@
     </section>
 
     <section class="card hidden" id="shopping-list-section">
-        <h2>Lista zakupów</h2>
+        <div class="section-header">
+            <h2>Lista zakupów</h2>
+            <div class="recipe-header">
+                <button id="edit-shopping-list-button" type="button">Edytuj</button>
+                <button id="download-shopping-list-button" type="button">Pobierz</button>
+            </div>
+        </div>
         <div id="shopping-list"></div>
     </section>
 </div>

@@ -12,9 +12,16 @@ const recipeDetails = document.getElementById("recipe-details");
 const shoppingListSection = document.getElementById("shopping-list-section");
 const shoppingList = document.getElementById("shopping-list");
 const shoppingListButton = document.getElementById("shopping-list-button");
+const editShoppingListButton = document.getElementById("edit-shopping-list-button");
+const downloadShoppingListButton = document.getElementById("download-shopping-list-button");
+
+const loadMealPlansButton = document.getElementById("load-meal-plans-button");
+const mealPlansList = document.getElementById("meal-plans-list");
 
 let currentMealPlanId = null;
 let currentMealPlan = null;
+let mealPlansVisible = false;
+let currentShoppingListId = null;
 
 form.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -45,6 +52,8 @@ form.addEventListener("submit", async (event) => {
 
         renderMealPlan(mealPlan);
         messageEl.textContent = "Meal plan został wygenerowany.";
+        loadMealPlansButton.click();
+
     } catch (error) {
         console.error(error);
         messageEl.textContent = "Błąd podczas generowania meal planu.";
@@ -57,15 +66,22 @@ shoppingListButton.addEventListener("click", async () => {
     }
 
     try {
-        const response = await fetch(`/api/meal-plans/get/shopping-list/${currentMealPlanId}`);
+        const response = await fetch(`/api/meal-plans/${currentMealPlanId}/shopping-list`, {
+            method: "POST"
+        });
 
         if (!response.ok) {
             const errorText = await response.text();
             throw new Error(errorText || "Nie udało się pobrać listy zakupów.");
         }
 
-        const items = await response.json();
-        renderShoppingList(items);
+        const shoppingListResponse = await response.json();
+        currentShoppingListId = shoppingListResponse.id;
+        renderShoppingList(shoppingListResponse);
+
+        currentMealPlan.shoppingListGenerated = true;
+        loadMealPlansButton.click();
+
     } catch (error) {
         console.error(error);
         shoppingList.innerHTML = "<p>Błąd podczas pobierania listy zakupów.</p>";
@@ -101,7 +117,8 @@ function renderMealPlan(mealPlan) {
                 <p><strong>ID przepisu:</strong> ${recipe.id ?? "-"}</p>
             </div>
             <div class="recipe-actions">
-                <button type="button" data-recipe-id="${recipe.id}">Pokaż szczegóły</button>
+                <button class="details-btn" data-recipe-id="${recipe.id}">Pokaż szczegóły</button>
+                <button class="replace-btn" data-recipe-id="${recipe.id}">Zamień przepis</button>
             </div>
         `;
 
@@ -110,8 +127,46 @@ function renderMealPlan(mealPlan) {
             fetchRecipeDetails(recipe.id);
         });
 
+        const replaceButton = recipeCard.querySelector(".replace-btn");
+
+        replaceButton.addEventListener("click", () => {
+            replaceRecipe(recipe.id);
+        });
+
         recipesList.appendChild(recipeCard);
     });
+}
+
+async function replaceRecipe(recipeId) {
+    if (!currentMealPlanId) return;
+
+    try {
+        messageEl.textContent = "Podmienianie przepisu...";
+
+        const response = await fetch(
+            `/api/meal-plans/${currentMealPlanId}/replace-recipe/${recipeId}`,
+            {
+                method: "POST"
+            }
+        );
+
+        if (!response.ok) {
+            throw new Error("Nie udało się podmienić przepisu.");
+        }
+
+        const updatedMealPlan = await response.json();
+
+        currentMealPlan = updatedMealPlan;
+
+        renderMealPlan(updatedMealPlan);
+
+        recipeDetailsSection.classList.add("hidden");
+
+        messageEl.textContent = "Przepis został podmieniony.";
+    } catch (error) {
+        console.error(error);
+        messageEl.textContent = "Błąd podczas podmiany przepisu.";
+    }
 }
 
 async function fetchRecipeDetails(recipeId) {
@@ -167,30 +222,163 @@ function renderRecipeDetails(recipe) {
         sourceUrl
             ? `<a href="${sourceUrl}" target="_blank">Zobacz przepis</a>`
             : "-"
-    }</p>
-        <p><strong>Obrazek:</strong> ${
-        imageUrl
-            ? `<a href="${imageUrl}" target="_blank">Podgląd obrazka</a>`
-            : "-"
-    }</p>
-        <h3>Składniki</h3>
-        ${ingredientsHtml}
-    `;
+    }
+        <div class="recipe-image">
+            ${
+            imageUrl
+                ? `<img src="${imageUrl}" alt="${recipeName}" />`
+                : "<p>Brak obrazka</p>"
+        }
+        </div>
+    <h3>Składniki</h3>
+    ${ingredientsHtml}
+    `
+;
 }
 
-function renderShoppingList(items) {
+function renderShoppingList(shoppingListResponse) {
     shoppingListSection.classList.remove("hidden");
 
-    if (!items || items.length === 0) {
+    if (!shoppingListResponse || !shoppingListResponse.items ||shoppingListResponse.items.length === 0) {
         shoppingList.innerHTML = "<p>Brak pozycji na liście zakupów.</p>";
         return;
     }
 
-    const html = items.map((item) => `
+    const html = shoppingListResponse.items.map((item) => `
         <li>
-            ${item.ingredientName ?? "-"} - ${item.amount ?? 0} ${item.unit ?? ""}
+            ${item.name ?? "-"} - ${item.amount ?? 0} ${item.unit ?? ""}
         </li>
     `).join("");
 
     shoppingList.innerHTML = `<ul class="shopping-list-items">${html}</ul>`;
 }
+
+loadMealPlansButton.addEventListener("click", async () => {
+    if (mealPlansVisible) {
+
+        mealPlansList.innerHTML = "";
+        mealPlansVisible = false;
+        loadMealPlansButton.textContent = "Pokaż zapisane meal plany";
+        return;
+    }
+
+    try {
+        const response = await fetch("/api/meal-plans/get/all");
+        if (!response.ok) throw new Error("Nie udało się pobrać meal planów.");
+
+        const mealPlans = await response.json();
+        renderMealPlansList(mealPlans);
+
+        mealPlansVisible = true;
+        loadMealPlansButton.textContent = "Ukryj meal plany";
+    } catch (error) {
+        console.error(error);
+        mealPlansList.innerHTML = "<p>Błąd podczas pobierania meal planów.</p>";
+    }
+});
+
+function renderMealPlansList(mealPlans) {
+    mealPlansList.innerHTML = "";
+
+    if (!mealPlans || mealPlans.length === 0) {
+        mealPlansList.innerHTML = "<p>Brak zapisanych meal planów.</p>";
+        return;
+    }
+
+    mealPlans.forEach(plan => {
+        const div = document.createElement("div");
+        div.className = "meal-plan-card";
+
+        div.innerHTML = `
+            <p><strong>ID:</strong> ${plan.id}</p>
+            <p><strong>Liczba dni:</strong> ${plan.daysCount ?? "-"}</p>
+            <p><strong>Lista zakupów:</strong>${plan.shoppingListGenerated ? "✔" : "❌"}</p>
+            <button data-id="${plan.id}" class="show-btn">Pokaż</button>
+            <button data-id="${plan.id}" class="delete-btn">Usuń</button>
+        `;
+
+        const showButton = div.querySelector(".show-btn");
+        const deleteButton = div.querySelector(".delete-btn");
+
+        showButton.addEventListener("click", () => {
+            fetchMealPlanById(plan.id);
+        });
+
+        deleteButton.addEventListener("click", () => {
+            deleteMealPlan(plan.id);
+        });
+
+        mealPlansList.appendChild(div);
+    });
+}
+
+async function fetchMealPlanById(id) {
+    try {
+        const response = await fetch(`/api/meal-plans/get/${id}`);
+
+        if (!response.ok) {
+            throw new Error("Nie udało się pobrać meal planu.");
+        }
+
+        const mealPlan = await response.json();
+
+        currentMealPlan = mealPlan;
+        currentMealPlanId = mealPlan.id;
+
+        renderMealPlan(mealPlan);
+
+        recipeDetailsSection.classList.add("hidden");
+        shoppingListSection.classList.add("hidden");
+
+    } catch (error) {
+        console.error(error);
+        messageEl.textContent = "Błąd podczas pobierania meal planu.";
+    }
+}
+
+async function deleteMealPlan(id) {
+    const confirmDelete = confirm("Czy na pewno chcesz usunąć ten meal plan?");
+
+    if (!confirmDelete) return;
+
+    try {
+        const response = await fetch(`/api/meal-plans/delete/${id}`, {
+            method: "DELETE"
+        });
+
+        if (!response.ok) {
+            throw new Error("Nie udało się usunąć meal planu.");
+        }
+
+        if (currentMealPlanId === id) {
+            mealPlanSection.classList.add("hidden");
+            recipeDetailsSection.classList.add("hidden");
+            shoppingListSection.classList.add("hidden");
+            currentMealPlanId = null;
+            currentMealPlan = null;
+        }
+
+        loadMealPlansButton.click();
+
+        messageEl.textContent = "Meal plan został usunięty.";
+    } catch (error) {
+        console.error(error);
+        messageEl.textContent = "Błąd podczas usuwania meal planu.";
+    }
+}
+
+editShoppingListButton.addEventListener("click", () => {
+    if (!currentShoppingListId) {
+        return;
+    }
+
+    window.location.href = `/shopping-list.html?id=${currentShoppingListId}`;
+})
+
+downloadShoppingListButton.addEventListener("click", () => {
+    if (!currentShoppingListId) {
+        return;
+    }
+
+    alert("Funkcja pobierania jest w trakcie tworzenia")
+})

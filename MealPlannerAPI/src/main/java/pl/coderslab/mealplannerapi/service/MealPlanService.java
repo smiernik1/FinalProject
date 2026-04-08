@@ -140,4 +140,30 @@ public class MealPlanService {
         return shoppingList;
     }
 
+    @Transactional
+    public MealPlan replaceRecipe(Long mealPlanId, Long recipeId) {
+        MealPlan mealPlan = getMealPlanById(mealPlanId);
+
+        int index = -1;
+        for (int i = 0; i < mealPlan.getRecipes().size(); i++) {
+            if (mealPlan.getRecipes().get(i).getId().equals(recipeId)) {
+                index = i;
+                break;
+            }
+        }
+
+        if (index == -1) {
+            throw new RuntimeException("Recipe not found in meal plan");
+        }
+
+        List<SpoonacularRecipeDTO> newRecipes = spoonacularClient.getRandomRecipes(1);
+        SpoonacularRecipeDTO newRecipeDTO = newRecipes.get(0);
+
+        Recipe newRecipe = getOrSaveRecipe(newRecipeDTO);
+
+        mealPlan.getRecipes().set(index, newRecipe);
+
+        return mealPlanRepository.save(mealPlan);
+    }
+
 }

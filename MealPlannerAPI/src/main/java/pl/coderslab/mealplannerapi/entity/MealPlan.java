@@ -35,6 +35,8 @@ public class MealPlan {
     )
     private List<Recipe> recipes = new ArrayList<>();
 
+    private boolean shoppingListGenerated;
+
 //    //Relacja @ManyToOne z User
 //    @ManyToOne
 //    @JoinColumn(name = "user_id")

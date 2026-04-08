@@ -43,4 +43,12 @@ public class MealPlanController {
     public List<ShoppingListItemDTO> getShoppingList(@PathVariable Long id) {
         return mealPlanService.getShoppingList(id);
     }
+
+    @PostMapping("/{mealPlanId}/replace-recipe/{recipeId}")
+    public MealPlan replaceRecipe(
+            @PathVariable Long mealPlanId,
+            @PathVariable Long recipeId
+    ) {
+        return mealPlanService.replaceRecipe(mealPlanId, recipeId);
+    }
 }

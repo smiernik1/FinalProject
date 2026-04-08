@@ -19,6 +19,7 @@ import java.util.Map;
 public class ShoppingListService {
     private final ShoppingListRepository shoppingListRepository;
     private final MealPlanRepository mealPlanRepository;
+
     public ShoppingListService(ShoppingListRepository shoppingListRepository, MealPlanRepository mealPlanRepository) {
         this.shoppingListRepository = shoppingListRepository;
         this.mealPlanRepository = mealPlanRepository;
@@ -30,7 +31,7 @@ public class ShoppingListService {
         ShoppingList shoppingList = shoppingListRepository.findByMealPlanId(mealPlanId)
                 .orElseGet(() -> {
                     MealPlan mealPlan = mealPlanRepository.findById(mealPlanId)
-                            .orElseThrow(()->new RuntimeException("Can't find mealPlan with id: " + mealPlanId));
+                            .orElseThrow(() -> new RuntimeException("Can't find mealPlan with id: " + mealPlanId));
 
                     return createShoppingList(mealPlan);
                 });
@@ -70,21 +71,22 @@ public class ShoppingListService {
 
             shoppingList.addItem(shoppingListItem);
         }
+        mealPlan.setShoppingListGenerated(true);
         return shoppingListRepository.save(shoppingList);
     }
 
     public ShoppingListResponseDTO getShoppingListById(Long Id) {
         ShoppingList shoppingList = shoppingListRepository.findById(Id)
-                .orElseThrow(()-> new RuntimeException("Can't find shoppingList with id: " + Id));
+                .orElseThrow(() -> new RuntimeException("Can't find shoppingList with id: " + Id));
         return mapToDto(shoppingList);
     }
 
     private ShoppingListResponseDTO mapToDto(ShoppingList shoppingList) {
         List<ShoppingListItemDTO> itemDto = shoppingList.getItems().stream()
-                .map(item->new ShoppingListItemDTO(
+                .map(item -> new ShoppingListItemDTO(
                         item.getId(),
-                        item.getAmount(),
                         item.getName(),
+                        item.getAmount(),
                         item.getUnit()
                 ))
                 .toList();
@@ -99,13 +101,13 @@ public class ShoppingListService {
     @Transactional
     public ShoppingListResponseDTO updateShoppingList(Long Id, UpdateShoppingListRequestDTO request) {
         ShoppingList shoppingList = shoppingListRepository.findById(Id)
-                .orElseThrow(()-> new RuntimeException("Can't find shoppingList with id: " + Id));
+                .orElseThrow(() -> new RuntimeException("Can't find shoppingList with id: " + Id));
 
         shoppingList.getItems().clear();
 
-        for  (ShoppingListItemDTO item : request.getItems()) {
+        for (ShoppingListItemDTO item : request.getItems()) {
             ShoppingListItem shoppingListItem = ShoppingListItem.builder()
-                    .name(item.getIngredientName())
+                    .name(item.getName())
                     .amount(item.getAmount())
                     .unit(item.getUnit())
                     .build();
@@ -117,10 +119,14 @@ public class ShoppingListService {
         return mapToDto(shoppingListUpdated);
     }
 
-    public void deleteShoppingList(Long Id) {
-        if(!shoppingListRepository.existsById(Id)) {
-            throw new RuntimeException("Can't find shoppingList with id: " + Id);
+    public void deleteShoppingList(Long id) {
+        ShoppingList shoppingList = shoppingListRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Can't find shoppingList with id: " + id));
+
+        MealPlan mealPlan = shoppingList.getMealPlan();
+        if (mealPlan != null) {
+            mealPlan.setShoppingListGenerated(false);
+            shoppingListRepository.deleteById(id);
         }
-        shoppingListRepository.deleteById(Id);
     }
 }

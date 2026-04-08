@@ -112,3 +112,27 @@ button:hover {
     gap: 12px;
     flex-wrap: wrap;
 }
+
+.recipe-image {
+    margin: 10px 0;
+    text-align: center;
+}
+
+.recipe-image img {
+    max-width: 100%;
+    max-height: 250px;
+    border-radius: 10px;
+    object-fit: cover;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+#meal-plans-list {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+}
+.meal-plan-card {
+    padding: 10px;
+    border-radius: 10px;
+    background: #f5f5f5;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}

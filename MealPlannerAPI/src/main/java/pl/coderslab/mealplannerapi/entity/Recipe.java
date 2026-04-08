@@ -31,6 +31,11 @@ public class Recipe {
     private String imageUrl;
     private String sourceUrl;
 
+    private Boolean vegetarian;
+    private Boolean vegan;
+    private Boolean glutenFree;
+    private Boolean dairyFree;
+
 //    //Relacja @ManyToMany z Category
 //    @ManyToMany(mappedBy = "recipes")
 //    private Set<Category> categories = new HashSet<>();
