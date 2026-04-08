@@ -70,8 +70,9 @@ public class SpoonacularClient {
             RestTemplate restTemplate = UnsafeRestTemplate.create();
             String url = properties.getBaseUrl()
                     + "/recipes/random?number=" + number
-                    + "&diet=" + diet
+                    + "&tags=" + diet
                     + "&apiKey=" + properties.getApiKey();
+            System.out.println(diet);
 
             SpoonacularRecipeResponseDTO response =  restTemplate.getForObject(url, SpoonacularRecipeResponseDTO.class);
 

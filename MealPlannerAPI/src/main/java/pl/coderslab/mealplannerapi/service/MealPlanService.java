@@ -44,9 +44,11 @@ public class MealPlanService {
         // jeśli dieta jest ustawiona, filtruj przepisy po diecie
         if (request.getDiet() != null && !request.getDiet().isEmpty()) {
             spoonacularRecipeDTO = spoonacularClient.getRandomRecipesByDiets(request.getDiet(), request.getDaysCount());
+            System.out.println("Dieta");
         } else {
             // inaczej pobierz losowe przepisy bez filtra
             spoonacularRecipeDTO = spoonacularClient.getRandomRecipes(request.getDaysCount());
+            System.out.println("Bez diety");
         }
 
         List<Recipe> recipes = new ArrayList<>();
