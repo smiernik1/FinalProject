@@ -97,6 +97,7 @@ function renderMealPlan(mealPlan) {
         <p><strong>ID meal planu:</strong> ${mealPlan.id}</p>
         <p><strong>Liczba dni:</strong> ${mealPlan.daysCount ?? "-"}</p>
         <p><strong>Liczba przepisów:</strong> ${mealPlan.recipes ? mealPlan.recipes.length : 0}</p>
+        <p><strong>Dieta:</strong> ${mealPlan.diet ?? "brak"}</p>
     `;
 
     recipesList.innerHTML = "";

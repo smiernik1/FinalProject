@@ -62,6 +62,7 @@ public class MealPlanService {
         mealPlan.setDaysCount(request.getDaysCount());
         mealPlan.setStartDate(LocalDate.now());
         mealPlan.setRecipes(recipes);
+        mealPlan.setDiet(request.getDiet());
 
         return mealPlanRepository.save(mealPlan);
     }
@@ -167,8 +168,15 @@ public class MealPlanService {
             throw new RuntimeException("Recipe not found in meal plan");
         }
 
-        List<SpoonacularRecipeDTO> newRecipes = spoonacularClient.getRandomRecipes(1);
-        SpoonacularRecipeDTO newRecipeDTO = newRecipes.get(0);
+        SpoonacularRecipeDTO newRecipeDTO;
+
+        if (mealPlan.getDiet() != null && !mealPlan.getDiet().isEmpty()) {
+            List<SpoonacularRecipeDTO> newRecipes = spoonacularClient.getRandomRecipesByDiets(mealPlan.getDiet(), 1);
+            newRecipeDTO = newRecipes.get(0);
+        } else {
+            List<SpoonacularRecipeDTO> newRecipes = spoonacularClient.getRandomRecipes(1);
+            newRecipeDTO = newRecipes.get(0);
+        }
 
         Recipe newRecipe = getOrSaveRecipe(newRecipeDTO);
 

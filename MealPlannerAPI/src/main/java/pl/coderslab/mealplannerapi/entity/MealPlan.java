@@ -37,6 +37,8 @@ public class MealPlan {
 
     private boolean shoppingListGenerated;
 
+    private String diet;
+
 //    //Relacja @ManyToOne z User
 //    @ManyToOne
 //    @JoinColumn(name = "user_id")
