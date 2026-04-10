@@ -41,14 +41,12 @@ public class MealPlanService {
 
         List<SpoonacularRecipeDTO> spoonacularRecipeDTO;
 
-        // jeśli dieta jest ustawiona, filtruj przepisy po diecie
         if (request.getDiet() != null && !request.getDiet().isEmpty()) {
             spoonacularRecipeDTO = spoonacularClient.getRandomRecipesByDiets(request.getDiet(), request.getDaysCount());
-            System.out.println("Dieta");
+            //System.out.println("Dieta");
         } else {
-            // inaczej pobierz losowe przepisy bez filtra
             spoonacularRecipeDTO = spoonacularClient.getRandomRecipes(request.getDaysCount());
-            System.out.println("Bez diety");
+            //System.out.println("Bez diety");
         }
 
         List<Recipe> recipes = new ArrayList<>();
@@ -78,7 +76,7 @@ public class MealPlanService {
                 .name(spoonacularRecipeDTO.getTitle())
                 .imageUrl(spoonacularRecipeDTO.getImage())
                 .sourceUrl(spoonacularRecipeDTO.getSourceUrl())
-                .calories(null)
+                .calories(extractCalories(spoonacularRecipeDTO))
                 .build();
         if (spoonacularRecipeDTO.getExtendedIngredients() != null) {
             for (SpoonacularIngredientDTO ingredientDTO : spoonacularRecipeDTO.getExtendedIngredients()) {
@@ -105,6 +103,18 @@ public class MealPlanService {
         }
 
         return recipeRepository.save(recipe);
+    }
+
+    private Integer extractCalories(SpoonacularRecipeDTO dto) {
+        if (dto.getNutrition() == null || dto.getNutrition().getNutrients() == null) {
+            return null;
+        }
+
+        return dto.getNutrition().getNutrients().stream()
+                .filter(n -> "Calories".equalsIgnoreCase(n.getName()))
+                .findFirst()
+                .map(n -> (int) Math.round(n.getAmount()))
+                .orElse(null);
     }
 
     public List<MealPlan> getAllMealPlans() {

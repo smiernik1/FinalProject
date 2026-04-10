@@ -11,21 +11,6 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class SpoonacularRecipeDTO {
-    private Long id;
-    private String title;
-    String image;
-    String sourceUrl;
-    Integer readyInMinutes;
-    Integer servings;
-
-    private NutritionDTO nutrition;
-
-    List<SpoonacularIngredientDTO> extendedIngredients;
-
-
+public class NutritionDTO {
+    private List<NutrientDTO> nutrients;
 }
-
-
-
-

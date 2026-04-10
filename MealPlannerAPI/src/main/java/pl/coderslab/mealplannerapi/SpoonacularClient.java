@@ -50,8 +50,12 @@ public class SpoonacularClient {
     public List<SpoonacularRecipeDTO> getRandomRecipes(int number) {
         try {
             RestTemplate restTemplate = UnsafeRestTemplate.create();
+//            String url = properties.getBaseUrl()
+//                    + "/recipes/random?number=" + number + "&apiKey="
+//                    + properties.getApiKey();
+
             String url = properties.getBaseUrl()
-                    + "/recipes/random?number=" + number + "&apiKey="
+                    + "/recipes/random?number=" + number + "&includeNutrition=true&apiKey="
                     + properties.getApiKey();
 
             SpoonacularRecipeResponseDTO response =  restTemplate.getForObject(url, SpoonacularRecipeResponseDTO.class);
@@ -68,11 +72,16 @@ public class SpoonacularClient {
     public List<SpoonacularRecipeDTO> getRandomRecipesByDiets(String diet, int number) {
         try {
             RestTemplate restTemplate = UnsafeRestTemplate.create();
+//            String url = properties.getBaseUrl()
+//                    + "/recipes/random?number=" + number
+//                    + "&tags=" + diet
+//                    + "&apiKey=" + properties.getApiKey();
+
             String url = properties.getBaseUrl()
                     + "/recipes/random?number=" + number
                     + "&tags=" + diet
-                    + "&apiKey=" + properties.getApiKey();
-            System.out.println(diet);
+                    + "&includeNutrition=true&apiKey=" + properties.getApiKey();
+            //System.out.println(diet);
 
             SpoonacularRecipeResponseDTO response =  restTemplate.getForObject(url, SpoonacularRecipeResponseDTO.class);
 
@@ -84,4 +93,19 @@ public class SpoonacularClient {
             throw new RuntimeException("Spoonacular API error", e);
         }
     }
+
+//    public SpoonacularRecipeDTO getRecipeCalories(Long externalId) {
+//        try {
+//            RestTemplate restTemplate = UnsafeRestTemplate.create();
+//            String url = properties.getBaseUrl()
+//                    + "/recipes/" + externalId
+//                    + "/information?includeNutrition=true&apiKey=" + properties.getApiKey();
+//            //System.out.println(diet);
+//
+//            return restTemplate.getForObject(url, SpoonacularRecipeDTO.class);
+//
+//        } catch (Exception e) {
+//            throw new RuntimeException("Spoonacular API error", e);
+//        }
+//    }
 }
