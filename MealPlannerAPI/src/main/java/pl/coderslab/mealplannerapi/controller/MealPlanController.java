@@ -20,8 +20,8 @@ public class MealPlanController {
     }
 
     @PostMapping("/generate")
-    public MealPlan generateMealPlan(@Valid @RequestBody CreateMealPlanRequestDTO request) {
-        return mealPlanService.generateMealPlan(request);
+    public MealPlan generateMealPlan(@Valid @RequestBody GenerateMealPlanRequest body) {
+        return mealPlanService.generateMealPlan(body.getRequest(), body.getDishTypes());
     }
 
     @GetMapping("/get/all")
@@ -44,11 +44,11 @@ public class MealPlanController {
         return mealPlanService.getShoppingList(id);
     }
 
-    @PostMapping("/{mealPlanId}/replace-recipe/{recipeId}")
-    public MealPlan replaceRecipe(
-            @PathVariable Long mealPlanId,
-            @PathVariable Long recipeId
-    ) {
-        return mealPlanService.replaceRecipe(mealPlanId, recipeId);
-    }
+//    @PostMapping("/{mealPlanId}/replace-recipe/{recipeId}")
+//    public MealPlan replaceRecipe(
+//            @PathVariable Long mealPlanId,
+//            @PathVariable Long recipeId
+//    ) {
+//        return mealPlanService.replaceRecipe(mealPlanId, recipeId);
+//    }
 }

@@ -37,16 +37,16 @@ public class MealPlanService {
     }
 
     @Transactional
-    public MealPlan generateMealPlan(CreateMealPlanRequestDTO request) {
+    public MealPlan generateMealPlan(CreateMealPlanRequestDTO request, List<String> dishTypes) {
 
-        List<SpoonacularRecipeDTO> spoonacularRecipeDTO;
+        List<SpoonacularRecipeDTO> spoonacularRecipeDTO = new ArrayList<>();
 
-        if (request.getDiet() != null && !request.getDiet().isEmpty()) {
-            spoonacularRecipeDTO = spoonacularClient.getRandomRecipesByDiets(request.getDiet(), request.getDaysCount());
-            //System.out.println("Dieta");
-        } else {
-            spoonacularRecipeDTO = spoonacularClient.getRandomRecipes(request.getDaysCount());
-            //System.out.println("Bez diety");
+        for (String dishType : dishTypes) {
+            if (request.getDiet() != null && !request.getDiet().isEmpty()) {
+                spoonacularRecipeDTO.addAll(spoonacularClient.getRandomRecipesByDiets(request.getDiet(), request.getDaysCount(), dishType));
+            } else {
+                spoonacularRecipeDTO.addAll(spoonacularClient.getRandomRecipes(request.getDaysCount(), dishType));
+            }
         }
 
         List<Recipe> recipes = new ArrayList<>();
@@ -162,37 +162,37 @@ public class MealPlanService {
         return shoppingList;
     }
 
-    @Transactional
-    public MealPlan replaceRecipe(Long mealPlanId, Long recipeId) {
-        MealPlan mealPlan = getMealPlanById(mealPlanId);
-
-        int index = -1;
-        for (int i = 0; i < mealPlan.getRecipes().size(); i++) {
-            if (mealPlan.getRecipes().get(i).getId().equals(recipeId)) {
-                index = i;
-                break;
-            }
-        }
-
-        if (index == -1) {
-            throw new RuntimeException("Recipe not found in meal plan");
-        }
-
-        SpoonacularRecipeDTO newRecipeDTO;
-
-        if (mealPlan.getDiet() != null && !mealPlan.getDiet().isEmpty()) {
-            List<SpoonacularRecipeDTO> newRecipes = spoonacularClient.getRandomRecipesByDiets(mealPlan.getDiet(), 1);
-            newRecipeDTO = newRecipes.get(0);
-        } else {
-            List<SpoonacularRecipeDTO> newRecipes = spoonacularClient.getRandomRecipes(1);
-            newRecipeDTO = newRecipes.get(0);
-        }
-
-        Recipe newRecipe = getOrSaveRecipe(newRecipeDTO);
-
-        mealPlan.getRecipes().set(index, newRecipe);
-
-        return mealPlanRepository.save(mealPlan);
-    }
+//    @Transactional
+//    public MealPlan replaceRecipe(Long mealPlanId, Long recipeId) {
+//        MealPlan mealPlan = getMealPlanById(mealPlanId);
+//
+//        int index = -1;
+//        for (int i = 0; i < mealPlan.getRecipes().size(); i++) {
+//            if (mealPlan.getRecipes().get(i).getId().equals(recipeId)) {
+//                index = i;
+//                break;
+//            }
+//        }
+//
+//        if (index == -1) {
+//            throw new RuntimeException("Recipe not found in meal plan");
+//        }
+//
+//        SpoonacularRecipeDTO newRecipeDTO;
+//
+//        if (mealPlan.getDiet() != null && !mealPlan.getDiet().isEmpty()) {
+//            List<SpoonacularRecipeDTO> newRecipes = spoonacularClient.getRandomRecipesByDiets(mealPlan.getDiet(), 1);
+//            newRecipeDTO = newRecipes.get(0);
+//        } else {
+//            List<SpoonacularRecipeDTO> newRecipes = spoonacularClient.getRandomRecipes(1);
+//            newRecipeDTO = newRecipes.get(0);
+//        }
+//
+//        Recipe newRecipe = getOrSaveRecipe(newRecipeDTO);
+//
+//        mealPlan.getRecipes().set(index, newRecipe);
+//
+//        return mealPlanRepository.save(mealPlan);
+//    }
 
 }

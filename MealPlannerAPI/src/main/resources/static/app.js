@@ -23,13 +23,43 @@ let currentMealPlan = null;
 let mealPlansVisible = false;
 let currentShoppingListId = null;
 
+const mealsPerDayInput = document.getElementById("mealsPerDay");
+const dishTypeCheckboxes = document.querySelectorAll('input[name="dishType"]');
+
+function getCheckedDishTypes() {
+    return Array.from(dishTypeCheckboxes)
+        .filter(cb => cb.checked)
+        .map(cb => cb.value);
+}
+
+dishTypeCheckboxes.forEach(cb => {
+    cb.addEventListener("change", () => {
+
+        const max = parseInt(mealsPerDayInput.value || 0);
+        const checked = getCheckedDishTypes();
+
+        if (checked.length > max) {
+            cb.checked = false;
+            alert(`Możesz wybrać tylko ${max} typy posiłków`);
+        }
+    });
+});
+
 form.addEventListener("submit", async (event) => {
     event.preventDefault();
 
     const daysCount = Number(daysCountInput.value);
     const diet = form.querySelector('input[name="diet"]:checked').value;
+    const mealsPerDay = Number(mealsPerDayInput.value);
+    const dishTypes = getCheckedDishTypes();
+
+    if (dishTypes.length !== mealsPerDay) {
+        alert("Musisz wybrać dokładnie tyle typów posiłków ile wynosi dzienna liczba posiłków");
+        return;
+    }
 
     messageEl.textContent = "Trwa generowanie meal planu...";
+
     recipeDetailsSection.classList.add("hidden");
     shoppingListSection.classList.add("hidden");
 
@@ -39,7 +69,13 @@ form.addEventListener("submit", async (event) => {
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({ daysCount, diet })
+            body: JSON.stringify({
+                request: {
+                    daysCount,
+                    mealsPerDay, diet
+                },
+                dishTypes
+            })
         });
 
         if (!response.ok) {
@@ -117,6 +153,7 @@ function renderMealPlan(mealPlan) {
             <h3>${recipe.name ?? "Brak nazwy"}</h3>
             <div class="recipe-meta">
                 <p><strong>ID przepisu:</strong> ${recipe.id ?? "-"}</p>
+                <p><strong>Kalorie:</strong> ${recipe.calories ?? "-"} kcal</p>
             </div>
             <div class="recipe-actions">
                 <button class="details-btn" data-recipe-id="${recipe.id}">Pokaż szczegóły</button>
@@ -227,21 +264,21 @@ function renderRecipeDetails(recipe) {
     }
         <div class="recipe-image">
             ${
-            imageUrl
-                ? `<img src="${imageUrl}" alt="${recipeName}" />`
-                : "<p>Brak obrazka</p>"
-        }
+        imageUrl
+            ? `<img src="${imageUrl}" alt="${recipeName}" />`
+            : "<p>Brak obrazka</p>"
+    }
         </div>
     <h3>Składniki</h3>
     ${ingredientsHtml}
     `
-;
+    ;
 }
 
 function renderShoppingList(shoppingListResponse) {
     shoppingListSection.classList.remove("hidden");
 
-    if (!shoppingListResponse || !shoppingListResponse.items ||shoppingListResponse.items.length === 0) {
+    if (!shoppingListResponse || !shoppingListResponse.items || shoppingListResponse.items.length === 0) {
         shoppingList.innerHTML = "<p>Brak pozycji na liście zakupów.</p>";
         return;
     }

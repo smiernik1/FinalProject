@@ -17,9 +17,10 @@ public class CreateMealPlanRequestDTO {
     @Min(value = 1, message = "daysCount must be at least 1")
     @Max(value = 14, message = "daysCount must be at most 14")
     private Integer daysCount;
+    private Integer mealPerDay;
 
     private String diet;
-    //    private Integer minCalories;
-    //    private Integer maxCalories;
-    //    private String category;
+
+    //private Integer minCalories;
+    //private Integer maxCalories;
 }

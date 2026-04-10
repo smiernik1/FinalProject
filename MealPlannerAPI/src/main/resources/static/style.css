@@ -49,6 +49,20 @@ form {
     gap: 10px;
 }
 
+.dish-types-row {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.calories-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
 .diet-row {
     display: flex;
     align-items: center;
