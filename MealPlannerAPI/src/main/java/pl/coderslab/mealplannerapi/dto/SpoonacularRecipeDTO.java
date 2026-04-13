@@ -22,8 +22,6 @@ public class SpoonacularRecipeDTO {
     private NutritionDTO nutrition;
 
     List<SpoonacularIngredientDTO> extendedIngredients;
-
-
 }
 
 

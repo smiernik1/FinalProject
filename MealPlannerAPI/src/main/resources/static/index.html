@@ -15,15 +15,14 @@
         <h2> Generowanie meal planu </h2>
         <form id="meal-plan-form">
             <div class = "days-row">
-                <label for="daysCount">Liczba dni:</label>
+                <label for="daysCount"><strong>Liczba dni:</strong></label>
                 <input type="number" id="daysCount" min="1">
-                <label for="mealsPerDay">Dzienna liczba posiłków:</label>
+                <label for="mealsPerDay"><strong>Dzienna liczba posiłków:</strong></label>
                 <input type="number" id="mealsPerDay" min="1" max="5">
             </div>
 
             <div class="dish-types-row">
-                <label>Typy posiłków:</label>
-
+                <p><strong>Typy posiłków:</strong></p>
                 <label><input type="checkbox" name="dishType" value="breakfast"> Śniadanie</label>
                 <label><input type="checkbox" name="dishType" value="main course"> Danie główne</label>
                 <label><input type="checkbox" name="dishType" value="soup"> Zupa</label>
@@ -31,20 +30,22 @@
                 <label><input type="checkbox" name="dishType" value="snack"> Przekąska</label>
             </div>
 
-<!--            <div class = "calories-row">-->
-<!--                <label for="minCalories">Minimalna liczba kalori:</label>-->
-<!--                <input type="number" id="minCalories" min="0">-->
-<!--                <label for="maxCalories">Maksymalna liczba kalori:</label>-->
-<!--                <input type="number" id="maxCalories" min="50">-->
-<!--            </div>-->
-
             <div class="diet-row">
-                <label>Dieta:</label>
+                <p><strong>Dieta:</strong></p>
                 <label><input type="radio" name="diet" value="" checked> Brak</label>
                 <label><input type="radio" name="diet" value="vegetarian"> Wegetariańska</label>
                 <label><input type="radio" name="diet" value="vegan"> Wegańska</label>
                 <label><input type="radio" name="diet" value="gluten-free"> Bezglutenowa</label>
                 <label><input type="radio" name="diet" value="dairy-free"> Bez nabiału</label>
+            </div>
+
+            <p><strong>Dzienna liczba kalorii </strong>(opcjonalnie)<strong>:</strong></p>
+
+            <div class = "calories-row">
+                <label for="minCalories">Min:</label>
+                <input type="number" id="minCalories" min="0">
+                <label for="maxCalories">Max:</label>
+                <input type="number" id="maxCalories" min="50">
             </div>
 
             <button type="submit">Generuj meal plan</button>
@@ -68,6 +69,7 @@
             <button id="shopping-list-button" type="button">Lista zakupów</button>
         </div>
         <div id="meal-plan-info"></div>
+        <div id="calorie-warning"></div>
         <div id="recipes-list"></div>
     </section>
 

@@ -1,7 +1,6 @@
 package pl.coderslab.mealplannerapi.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,9 +8,7 @@ import lombok.Setter;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Entity
 @Table(name = "meal_plans")
@@ -27,20 +24,29 @@ public class MealPlan {
     private Integer daysCount;
 
     //Relacja @ManyToMany z Recipe
-    @ManyToMany
-    @JoinTable(
-            name = "mealplan_recipe",
-            joinColumns = @JoinColumn(name = "mealplan_id"),
-            inverseJoinColumns = @JoinColumn(name = "recipe_id")
-    )
-    private List<Recipe> recipes = new ArrayList<>();
+//    @ManyToMany
+//    @JoinTable(
+//            name = "mealplan_recipe",
+//            joinColumns = @JoinColumn(name = "mealplan_id"),
+//            inverseJoinColumns = @JoinColumn(name = "recipe_id")
+//    )
+//    private List<Recipe> recipes = new ArrayList<>();
+
+    @OneToMany(mappedBy = "mealPlan", cascade = CascadeType.ALL, orphanRemoval = true)
+    //@JsonIgnore
+    private List<MealPlanRecipe> mealPlanRecipes =  new ArrayList<>();
+
+    public void addRecipe(Recipe recipe, int day, String dishType) {
+        MealPlanRecipe mpr = new MealPlanRecipe();
+        mpr.setMealPlan(this);
+        mpr.setRecipe(recipe);
+        mpr.setDay(day);
+        mpr.setDishType(dishType);
+
+        mealPlanRecipes.add(mpr);
+    }
 
     private boolean shoppingListGenerated;
 
     private String diet;
-
-//    //Relacja @ManyToOne z User
-//    @ManyToOne
-//    @JoinColumn(name = "user_id")
-//    private User user;
 }

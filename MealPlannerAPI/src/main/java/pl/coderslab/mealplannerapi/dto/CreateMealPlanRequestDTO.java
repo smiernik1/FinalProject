@@ -1,11 +1,17 @@
 package pl.coderslab.mealplannerapi.dto;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import pl.coderslab.mealplannerapi.entity.MealPlan;
+import pl.coderslab.mealplannerapi.entity.MealPlanRecipe;
 
 import java.util.List;
 
@@ -20,7 +26,4 @@ public class CreateMealPlanRequestDTO {
     private Integer mealPerDay;
 
     private String diet;
-
-    //private Integer minCalories;
-    //private Integer maxCalories;
 }

@@ -46,7 +46,8 @@ form {
 .days-row {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 15px;
+    margin-bottom: -10px;
 }
 
 .dish-types-row {
@@ -54,6 +55,7 @@ form {
     align-items: center;
     gap: 15px;
     flex-wrap: wrap;
+    margin-bottom: -15px;
 }
 
 .calories-row {
@@ -61,18 +63,21 @@ form {
     align-items: center;
     gap: 10px;
     flex-wrap: wrap;
+    margin-bottom: 15px;
+    margin-top: -5px;
 }
 
 .diet-row {
     display: flex;
     align-items: center;
     gap: 15px;
+    margin-bottom: -15px;
 }
 
 label {
     display: block;
     margin-bottom: 6px;
-    font-weight: bold;
+    /*font-weight: bold;*/
 }
 
 input[type="number"] {

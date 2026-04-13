@@ -38,10 +38,12 @@ public class ShoppingListService {
         return mapToDto(shoppingList);
     }
 
-    private ShoppingList createShoppingList(MealPlan mealPlan) {
+    @Transactional
+    protected ShoppingList createShoppingList(MealPlan mealPlan) {
         Map<String, BigDecimal> totals = new LinkedHashMap<>();
 
-        for (Recipe recipe : mealPlan.getRecipes()) {
+        for (MealPlanRecipe mealPlanRecipe : mealPlan.getMealPlanRecipes()) {
+            Recipe recipe = mealPlanRecipe.getRecipe();
             for (RecipeIngredient recipeIngredient : recipe.getRecipeIngredients()) {
                 String ingredientName = recipeIngredient.getIngredient().getName();
                 String unit = recipeIngredient.getUnit();
@@ -126,6 +128,7 @@ public class ShoppingListService {
         MealPlan mealPlan = shoppingList.getMealPlan();
         if (mealPlan != null) {
             mealPlan.setShoppingListGenerated(false);
+            mealPlanRepository.save(mealPlan);
             shoppingListRepository.deleteById(id);
         }
     }

@@ -7,10 +7,7 @@ import pl.coderslab.mealplannerapi.dto.CreateMealPlanRequestDTO;
 import pl.coderslab.mealplannerapi.dto.ShoppingListItemDTO;
 import pl.coderslab.mealplannerapi.dto.SpoonacularIngredientDTO;
 import pl.coderslab.mealplannerapi.dto.SpoonacularRecipeDTO;
-import pl.coderslab.mealplannerapi.entity.Ingredient;
-import pl.coderslab.mealplannerapi.entity.MealPlan;
-import pl.coderslab.mealplannerapi.entity.Recipe;
-import pl.coderslab.mealplannerapi.entity.RecipeIngredient;
+import pl.coderslab.mealplannerapi.entity.*;
 import pl.coderslab.mealplannerapi.repository.IngredientRepository;
 import pl.coderslab.mealplannerapi.repository.MealPlanRepository;
 import pl.coderslab.mealplannerapi.repository.RecipeRepository;
@@ -59,7 +56,21 @@ public class MealPlanService {
         MealPlan mealPlan = new MealPlan();
         mealPlan.setDaysCount(request.getDaysCount());
         mealPlan.setStartDate(LocalDate.now());
-        mealPlan.setRecipes(recipes);
+        //mealPlan.setRecipes(recipes);
+        int index = 0;
+
+        for (int i = 0; i <recipes.size(); i++) {
+            Recipe recipe = recipes.get(i);
+            int day = (index % request.getDaysCount()) + 1;
+            String dishType = dishTypes.get(i / dishTypes.size());
+            mealPlan.addRecipe(recipe, day, dishType);
+            index++;
+        }
+//        for (Recipe recipe : recipes) {
+//            int day = (index % request.getDaysCount()) + 1;
+//            mealPlan.addRecipe(recipe, day);
+//            index++;
+//        }
         mealPlan.setDiet(request.getDiet());
 
         return mealPlanRepository.save(mealPlan);
@@ -139,7 +150,8 @@ public class MealPlanService {
 
         Map<String, BigDecimal> totals = new LinkedHashMap<>();
 
-        for (Recipe recipe : mealPlan.getRecipes()) {
+        for (MealPlanRecipe mealPlanRecipe : mealPlan.getMealPlanRecipes()) {
+            Recipe recipe = mealPlanRecipe.getRecipe();
             for (RecipeIngredient recipeIngredient : recipe.getRecipeIngredients()) {
                 String ingredientName = recipeIngredient.getIngredient().getName();
                 String unit = recipeIngredient.getUnit();
@@ -194,5 +206,57 @@ public class MealPlanService {
 //
 //        return mealPlanRepository.save(mealPlan);
 //    }
+
+    @Transactional
+    public MealPlan replaceRecipe(Long mealPlanId, Long recipeId) {
+
+        MealPlan mealPlan = getMealPlanById(mealPlanId);
+
+        MealPlanRecipe target = null;
+
+        for (MealPlanRecipe mpr : mealPlan.getMealPlanRecipes()) {
+            if (mpr.getRecipe().getId().equals(recipeId)) {
+                target = mpr;
+                break;
+            }
+        }
+
+        if (target == null) {
+            throw new RuntimeException("Recipe not found in meal plan");
+        }
+
+        String dishType = target.getDishType();
+
+        if (dishType == null || dishType.isBlank()) {
+            throw new RuntimeException("Dish type missing for recipe in meal plan");
+        }
+
+        List<SpoonacularRecipeDTO> results;
+
+        if (mealPlan.getDiet() != null && !mealPlan.getDiet().isBlank()) {
+            results = spoonacularClient.getRandomRecipesByDiets(
+                    mealPlan.getDiet(),
+                    1,
+                    dishType
+            );
+        } else {
+            results = spoonacularClient.getRandomRecipes(
+                    1,
+                    dishType
+            );
+        }
+
+        if (results == null || results.isEmpty()) {
+            throw new RuntimeException("No recipes found for replacement");
+        }
+
+        SpoonacularRecipeDTO newRecipeDTO = results.get(0);
+
+        Recipe newRecipe = getOrSaveRecipe(newRecipeDTO);
+
+        target.setRecipe(newRecipe);
+
+        return mealPlanRepository.save(mealPlan);
+    }
 
 }

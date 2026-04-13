@@ -18,6 +18,10 @@ const downloadShoppingListButton = document.getElementById("download-shopping-li
 const loadMealPlansButton = document.getElementById("load-meal-plans-button");
 const mealPlansList = document.getElementById("meal-plans-list");
 
+const minCaloriesInput = document.getElementById("minCalories");
+const maxCaloriesInput = document.getElementById("maxCalories");
+const warningEl = document.getElementById("calorie-warning");
+
 let currentMealPlanId = null;
 let currentMealPlan = null;
 let mealPlansVisible = false;
@@ -132,48 +136,80 @@ function renderMealPlan(mealPlan) {
     mealPlanInfo.innerHTML = `
         <p><strong>ID meal planu:</strong> ${mealPlan.id}</p>
         <p><strong>Liczba dni:</strong> ${mealPlan.daysCount ?? "-"}</p>
-        <p><strong>Liczba przepisów:</strong> ${mealPlan.recipes ? mealPlan.recipes.length : 0}</p>
+        <p><strong>Liczba przepisów:</strong> ${mealPlan.mealPlanRecipes ? mealPlan.mealPlanRecipes.length : 0}</p>
         <p><strong>Dieta:</strong> ${mealPlan.diet ?? "brak"}</p>
     `;
 
     recipesList.innerHTML = "";
 
-    const recipes = mealPlan.recipes || [];
+    const mealPlanRecipes = mealPlan.mealPlanRecipes || [];
+    const grouped = {};
+    const caloriesByDay = {};
 
-    if (recipes.length === 0) {
+    mealPlanRecipes.forEach(mpr => {
+        const day = mpr.day;
+        const recipe = mpr.recipe;
+        const calories = recipe?.calories || 0;
+
+        if (!grouped[day]) grouped[day] = [];
+        grouped[day].push(recipe);
+
+        caloriesByDay[day] = (caloriesByDay[day] || 0) + calories;
+    });
+
+    if (mealPlanRecipes.length === 0) {
         recipesList.innerHTML = "<p>Brak przepisów w meal planie.</p>";
         return;
     }
 
-    recipes.forEach((recipe) => {
-        const recipeCard = document.createElement("div");
-        recipeCard.className = "recipe-card";
+    Object.keys(grouped)
+        .sort((a, b) => a - b)
+        .forEach(day => {
 
-        recipeCard.innerHTML = `
-            <h3>${recipe.name ?? "Brak nazwy"}</h3>
-            <div class="recipe-meta">
-                <p><strong>ID przepisu:</strong> ${recipe.id ?? "-"}</p>
-                <p><strong>Kalorie:</strong> ${recipe.calories ?? "-"} kcal</p>
-            </div>
-            <div class="recipe-actions">
-                <button class="details-btn" data-recipe-id="${recipe.id}">Pokaż szczegóły</button>
-                <button class="replace-btn" data-recipe-id="${recipe.id}">Zamień przepis</button>
-            </div>
+            const totalCalories = caloriesByDay[day] || 0;
+
+            const dayHeader = document.createElement("h2");
+            dayHeader.textContent = `Dzień ${day} (${totalCalories} kcal)`;
+            recipesList.appendChild(dayHeader);
+
+            grouped[day].forEach(recipe => {
+                const recipeCard = document.createElement("div");
+                recipeCard.className = "recipe-card";
+
+                recipeCard.innerHTML = `
+                <h3>${recipe.name ?? "Brak nazwy"}</h3>
+                <div class="recipe-meta">
+                    <p><strong>ID:</strong> ${recipe.id}</p>
+                    <p><strong>Kalorie:</strong> ${recipe.calories ?? "-"} kcal</p>
+                </div>
+                <div class="recipe-actions">
+                    <button class="details-btn">Pokaż szczegóły</button>
+                    <button class="replace-btn">Zamień przepis</button>
+                </div>
+            `;
+
+                recipeCard.querySelector(".details-btn")
+                    .addEventListener("click", () => fetchRecipeDetails(recipe.id));
+
+                recipeCard.querySelector(".replace-btn")
+                    .addEventListener("click", () => replaceRecipe(recipe.id));
+
+                recipesList.appendChild(recipeCard);
+            });
+        });
+
+    if (warnings.length > 0) {
+        warningEl.innerHTML = `
+            <p style="color: orange; font-weight: bold;">
+                ⚠️ Dni poza zakresem kalorii:
+            </p>
+            <ul>
+                ${warnings.map(w => `<li>${w}</li>`).join("")}
+            </ul>
         `;
-
-        const detailsButton = recipeCard.querySelector("button");
-        detailsButton.addEventListener("click", () => {
-            fetchRecipeDetails(recipe.id);
-        });
-
-        const replaceButton = recipeCard.querySelector(".replace-btn");
-
-        replaceButton.addEventListener("click", () => {
-            replaceRecipe(recipe.id);
-        });
-
-        recipesList.appendChild(recipeCard);
-    });
+    } else {
+        warningEl.innerHTML = "";
+    }
 }
 
 async function replaceRecipe(recipeId) {

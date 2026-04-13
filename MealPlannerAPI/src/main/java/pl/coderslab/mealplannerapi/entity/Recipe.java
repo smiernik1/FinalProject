@@ -31,10 +31,6 @@ public class Recipe {
     private String imageUrl;
     private String sourceUrl;
 
-//    //Relacja @ManyToMany z Category
-//    @ManyToMany(mappedBy = "recipes")
-//    private Set<Category> categories = new HashSet<>();
-
     //Relacja @OneToMany z RecipeIngredient
     @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
