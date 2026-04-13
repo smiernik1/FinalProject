@@ -21,8 +21,11 @@ import java.util.List;
 public class CreateMealPlanRequestDTO {
     @NotNull(message = "daysCount is required")
     @Min(value = 1, message = "daysCount must be at least 1")
-    @Max(value = 14, message = "daysCount must be at most 14")
+    @Max(value = 5, message = "daysCount must be at most 5")
     private Integer daysCount;
+    @NotNull(message = "mealPerDay is required")
+    @Min(value = 1, message = "mealPerDay must be at least 1")
+    @Max(value = 14, message = "maelPerDay must be at most 8")
     private Integer mealPerDay;
 
     private String diet;

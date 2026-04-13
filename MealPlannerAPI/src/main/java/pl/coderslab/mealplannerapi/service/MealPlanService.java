@@ -62,7 +62,7 @@ public class MealPlanService {
         for (int i = 0; i <recipes.size(); i++) {
             Recipe recipe = recipes.get(i);
             int day = (index % request.getDaysCount()) + 1;
-            String dishType = dishTypes.get(i / dishTypes.size());
+            String dishType = dishTypes.get(i / request.getDaysCount());
             mealPlan.addRecipe(recipe, day, dishType);
             index++;
         }

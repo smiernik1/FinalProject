@@ -55,7 +55,7 @@ public class RecipeImportService {
                         .amount(ingredientDTO.getAmount() != null ? ingredientDTO.getAmount() : BigDecimal.ZERO)
                         .unit(
                                 ingredientDTO.getUnit() != null && !ingredientDTO.getUnit().isBlank()
-                                ? ingredientDTO.getUnit() : "-"
+                                ? ingredientDTO.getUnit() : "units"
                         )
                         .build();
 

@@ -20,7 +20,6 @@ const mealPlansList = document.getElementById("meal-plans-list");
 
 const minCaloriesInput = document.getElementById("minCalories");
 const maxCaloriesInput = document.getElementById("maxCalories");
-const warningEl = document.getElementById("calorie-warning");
 
 let currentMealPlanId = null;
 let currentMealPlan = null;
@@ -34,6 +33,14 @@ function getCheckedDishTypes() {
     return Array.from(dishTypeCheckboxes)
         .filter(cb => cb.checked)
         .map(cb => cb.value);
+}
+
+function updateShoppingButton(mealPlan) {
+    const btn = document.getElementById("shopping-list-button");
+
+    btn.textContent = mealPlan.shoppingListGenerated
+        ? "Wyświetl listę zakupów"
+        : "Generuj listę zakupów";
 }
 
 dishTypeCheckboxes.forEach(cb => {
@@ -92,6 +99,8 @@ form.addEventListener("submit", async (event) => {
         currentMealPlanId = mealPlan.id;
 
         renderMealPlan(mealPlan);
+        const checkboxes = document.querySelectorAll('input[name="dishTypes"]');
+        checkboxes.forEach(cb => cb.checked = false);
         messageEl.textContent = "Meal plan został wygenerowany.";
         loadMealPlansButton.click();
 
@@ -137,7 +146,7 @@ function renderMealPlan(mealPlan) {
         <p><strong>ID meal planu:</strong> ${mealPlan.id}</p>
         <p><strong>Liczba dni:</strong> ${mealPlan.daysCount ?? "-"}</p>
         <p><strong>Liczba przepisów:</strong> ${mealPlan.mealPlanRecipes ? mealPlan.mealPlanRecipes.length : 0}</p>
-        <p><strong>Dieta:</strong> ${mealPlan.diet ?? "brak"}</p>
+        <p><strong>Dieta:</strong> ${mealPlan.diet || "brak"}</p>
     `;
 
     recipesList.innerHTML = "";
@@ -162,6 +171,9 @@ function renderMealPlan(mealPlan) {
         return;
     }
 
+    const min = minCaloriesInput.value ? Number(minCaloriesInput.value) : 0;
+    const max = maxCaloriesInput.value ? Number(maxCaloriesInput.value) : Infinity;
+
     Object.keys(grouped)
         .sort((a, b) => a - b)
         .forEach(day => {
@@ -171,6 +183,16 @@ function renderMealPlan(mealPlan) {
             const dayHeader = document.createElement("h2");
             dayHeader.textContent = `Dzień ${day} (${totalCalories} kcal)`;
             recipesList.appendChild(dayHeader);
+
+            if (totalCalories < min) {
+                dayHeader.textContent += " - ZA MAŁO KALORII"
+                dayHeader.style.color = "red";
+            }
+
+            if (totalCalories > max) {
+                dayHeader.textContent += " - ZA DUŻO KALORII"
+                dayHeader.style.color = "red";
+            }
 
             grouped[day].forEach(recipe => {
                 const recipeCard = document.createElement("div");
@@ -184,32 +206,22 @@ function renderMealPlan(mealPlan) {
                 </div>
                 <div class="recipe-actions">
                     <button class="details-btn">Pokaż szczegóły</button>
-                    <button class="replace-btn">Zamień przepis</button>
+                    ${!mealPlan.shoppingListGenerated ? `<button class="replace-btn">Zamień przepis</button>` : ""}
                 </div>
             `;
 
                 recipeCard.querySelector(".details-btn")
                     .addEventListener("click", () => fetchRecipeDetails(recipe.id));
 
-                recipeCard.querySelector(".replace-btn")
-                    .addEventListener("click", () => replaceRecipe(recipe.id));
+                const replaceBtn = recipeCard.querySelector(".replace-btn");
+                if (replaceBtn) {
+                    replaceBtn.addEventListener("click", () => replaceRecipe(recipe.id));
+                }
 
                 recipesList.appendChild(recipeCard);
             });
         });
-
-    if (warnings.length > 0) {
-        warningEl.innerHTML = `
-            <p style="color: orange; font-weight: bold;">
-                ⚠️ Dni poza zakresem kalorii:
-            </p>
-            <ul>
-                ${warnings.map(w => `<li>${w}</li>`).join("")}
-            </ul>
-        `;
-    } else {
-        warningEl.innerHTML = "";
-    }
+    updateShoppingButton(mealPlan);
 }
 
 async function replaceRecipe(recipeId) {
