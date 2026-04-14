@@ -18,9 +18,6 @@ const downloadShoppingListButton = document.getElementById("download-shopping-li
 const loadMealPlansButton = document.getElementById("load-meal-plans-button");
 const mealPlansList = document.getElementById("meal-plans-list");
 
-const minCaloriesInput = document.getElementById("minCalories");
-const maxCaloriesInput = document.getElementById("maxCalories");
-
 let currentMealPlanId = null;
 let currentMealPlan = null;
 let mealPlansVisible = false;
@@ -43,6 +40,13 @@ function updateShoppingButton(mealPlan) {
         : "Generuj listę zakupów";
 }
 
+async function loadMealPlans() {
+    const response = await fetch("/api/meal-plans/get/all");
+    if (!response.ok) throw new Error("Nie udało się pobrać meal planów.");
+
+    return await response.json();
+}
+
 dishTypeCheckboxes.forEach(cb => {
     cb.addEventListener("change", () => {
 
@@ -61,11 +65,24 @@ form.addEventListener("submit", async (event) => {
 
     const daysCount = Number(daysCountInput.value);
     const diet = form.querySelector('input[name="diet"]:checked').value;
+    const minCaloriesValue = form.querySelector('input[name="minCalories"]').value;
+    const maxCaloriesValue = form.querySelector('input[name="maxCalories"]').value;
+    const minCalories = minCaloriesValue === "" ? null : Number(minCaloriesValue);
+    const maxCalories = maxCaloriesValue === "" ? null : Number(maxCaloriesValue);
     const mealsPerDay = Number(mealsPerDayInput.value);
     const dishTypes = getCheckedDishTypes();
 
     if (dishTypes.length !== mealsPerDay) {
         alert("Musisz wybrać dokładnie tyle typów posiłków ile wynosi dzienna liczba posiłków");
+        return;
+    }
+
+    if (minCalories <= 0) {
+        alert("Min kalorii musi być większe od 0");
+        return;
+    }
+    if (maxCalories <= minCalories) {
+        alert("Max kolorii musi być większe od min");
         return;
     }
 
@@ -83,7 +100,10 @@ form.addEventListener("submit", async (event) => {
             body: JSON.stringify({
                 request: {
                     daysCount,
-                    mealsPerDay, diet
+                    mealsPerDay,
+                    diet,
+                    minCalories,
+                    maxCalories
                 },
                 dishTypes
             })
@@ -99,10 +119,13 @@ form.addEventListener("submit", async (event) => {
         currentMealPlanId = mealPlan.id;
 
         renderMealPlan(mealPlan);
-        const checkboxes = document.querySelectorAll('input[name="dishTypes"]');
-        checkboxes.forEach(cb => cb.checked = false);
+
+        dishTypeCheckboxes.forEach(cb => cb.checked = false);
         messageEl.textContent = "Meal plan został wygenerowany.";
-        loadMealPlansButton.click();
+        if (mealPlansVisible) {
+            const mealPlans = await loadMealPlans();
+            renderMealPlansList(mealPlans);
+        }
 
     } catch (error) {
         console.error(error);
@@ -128,9 +151,15 @@ shoppingListButton.addEventListener("click", async () => {
         const shoppingListResponse = await response.json();
         currentShoppingListId = shoppingListResponse.id;
         renderShoppingList(shoppingListResponse);
+        // updateShoppingButton(mealPlan);
 
         currentMealPlan.shoppingListGenerated = true;
-        loadMealPlansButton.click();
+        updateShoppingButton(currentMealPlan);
+
+        if (mealPlansVisible) {
+            const mealPlans = await loadMealPlans();
+            renderMealPlansList(mealPlans);
+        }
 
     } catch (error) {
         console.error(error);
@@ -171,9 +200,6 @@ function renderMealPlan(mealPlan) {
         return;
     }
 
-    const min = minCaloriesInput.value ? Number(minCaloriesInput.value) : 0;
-    const max = maxCaloriesInput.value ? Number(maxCaloriesInput.value) : Infinity;
-
     Object.keys(grouped)
         .sort((a, b) => a - b)
         .forEach(day => {
@@ -184,14 +210,12 @@ function renderMealPlan(mealPlan) {
             dayHeader.textContent = `Dzień ${day} (${totalCalories} kcal)`;
             recipesList.appendChild(dayHeader);
 
-            if (totalCalories < min) {
-                dayHeader.textContent += " - ZA MAŁO KALORII"
-                dayHeader.style.color = "red";
+            if (mealPlan.minCalories != null && totalCalories < mealPlan.minCalories) {
+                dayHeader.textContent += ` <span class="calorie-warning">⚠️ Kalorie poniżej limitu (${mealPlan.minCalories} kcal)</span>`;
             }
 
-            if (totalCalories > max) {
-                dayHeader.textContent += " - ZA DUŻO KALORII"
-                dayHeader.style.color = "red";
+            if (mealPlan.maxCalories != null && totalCalories > mealPlan.maxCalories) {
+                dayHeader.innerHTML += ` <span class="calorie-warning">⚠️ Przekroczono limit kalorii (${mealPlan.maxCalories} kcal)</span>`;
             }
 
             grouped[day].forEach(recipe => {
@@ -338,6 +362,7 @@ function renderShoppingList(shoppingListResponse) {
     `).join("");
 
     shoppingList.innerHTML = `<ul class="shopping-list-items">${html}</ul>`;
+
 }
 
 loadMealPlansButton.addEventListener("click", async () => {
@@ -350,10 +375,7 @@ loadMealPlansButton.addEventListener("click", async () => {
     }
 
     try {
-        const response = await fetch("/api/meal-plans/get/all");
-        if (!response.ok) throw new Error("Nie udało się pobrać meal planów.");
-
-        const mealPlans = await response.json();
+        const mealPlans = await loadMealPlans();
         renderMealPlansList(mealPlans);
 
         mealPlansVisible = true;
@@ -458,7 +480,6 @@ editShoppingListButton.addEventListener("click", () => {
     if (!currentShoppingListId) {
         return;
     }
-
     window.location.href = `/shopping-list.html?id=${currentShoppingListId}`;
 })
 
@@ -466,6 +487,5 @@ downloadShoppingListButton.addEventListener("click", () => {
     if (!currentShoppingListId) {
         return;
     }
-
     alert("Funkcja pobierania jest w trakcie tworzenia")
 })

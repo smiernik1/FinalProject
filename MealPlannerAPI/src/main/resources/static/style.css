@@ -167,3 +167,7 @@ button:hover {
     background: #f5f5f5;
     box-shadow: 0 2px 6px rgba(0,0,0,0.1);
 }
+.calorie-warning {
+    color: red;
+    font-weight: normal;
+}

@@ -29,4 +29,8 @@ public class CreateMealPlanRequestDTO {
     private Integer mealPerDay;
 
     private String diet;
+    @Min(value = 0, message = "minCalories must be at least 0")
+    private Integer minCalories;
+    @Min(value = 10, message = "maxCalories must be at least 10")
+    private Integer maxCalories;
 }

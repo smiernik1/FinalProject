@@ -73,6 +73,15 @@ public class MealPlanService {
 //        }
         mealPlan.setDiet(request.getDiet());
 
+        if (request.getMinCalories() != null &&
+                request.getMaxCalories() != null &&
+                request.getMaxCalories() <= request.getMinCalories()) {
+
+            throw new IllegalArgumentException("Max calories must be > min calories");
+        }
+        mealPlan.setMinCalories(request.getMinCalories());
+        mealPlan.setMaxCalories(request.getMaxCalories());
+
         return mealPlanRepository.save(mealPlan);
     }
 

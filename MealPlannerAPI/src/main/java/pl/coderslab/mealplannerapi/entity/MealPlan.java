@@ -22,8 +22,6 @@ public class MealPlan {
     private Long id;
     private LocalDate startDate;
     private Integer daysCount;
-//    private Integer minCalories = 0;
-//    private Integer maxCalories = Integer.MAX_VALUE;
 
     //Relacja @ManyToMany z Recipe
 //    @ManyToMany
@@ -51,4 +49,6 @@ public class MealPlan {
     private boolean shoppingListGenerated;
 
     private String diet;
+    private Integer minCalories;
+    private Integer maxCalories;
 }
