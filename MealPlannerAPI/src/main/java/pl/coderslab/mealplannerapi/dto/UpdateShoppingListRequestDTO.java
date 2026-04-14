@@ -1,6 +1,7 @@
 package pl.coderslab.mealplannerapi.dto;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,7 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 public class UpdateShoppingListRequestDTO {
 
-    @NotNull(message = "items are required")
+    @NotEmpty(message = "Shopping list cannot be empty")
     @Valid
     private List<ShoppingListItemDTO> items =  new ArrayList<>();
 

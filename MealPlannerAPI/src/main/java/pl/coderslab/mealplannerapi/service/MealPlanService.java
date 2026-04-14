@@ -56,7 +56,7 @@ public class MealPlanService {
         MealPlan mealPlan = new MealPlan();
         mealPlan.setDaysCount(request.getDaysCount());
         mealPlan.setStartDate(LocalDate.now());
-        //mealPlan.setRecipes(recipes);
+
         int index = 0;
 
         for (int i = 0; i <recipes.size(); i++) {
@@ -66,11 +66,6 @@ public class MealPlanService {
             mealPlan.addRecipe(recipe, day, dishType);
             index++;
         }
-//        for (Recipe recipe : recipes) {
-//            int day = (index % request.getDaysCount()) + 1;
-//            mealPlan.addRecipe(recipe, day);
-//            index++;
-//        }
         mealPlan.setDiet(request.getDiet());
 
         if (request.getMinCalories() != null &&
@@ -183,39 +178,6 @@ public class MealPlanService {
         return shoppingList;
     }
 
-//    @Transactional
-//    public MealPlan replaceRecipe(Long mealPlanId, Long recipeId) {
-//        MealPlan mealPlan = getMealPlanById(mealPlanId);
-//
-//        int index = -1;
-//        for (int i = 0; i < mealPlan.getRecipes().size(); i++) {
-//            if (mealPlan.getRecipes().get(i).getId().equals(recipeId)) {
-//                index = i;
-//                break;
-//            }
-//        }
-//
-//        if (index == -1) {
-//            throw new RuntimeException("Recipe not found in meal plan");
-//        }
-//
-//        SpoonacularRecipeDTO newRecipeDTO;
-//
-//        if (mealPlan.getDiet() != null && !mealPlan.getDiet().isEmpty()) {
-//            List<SpoonacularRecipeDTO> newRecipes = spoonacularClient.getRandomRecipesByDiets(mealPlan.getDiet(), 1);
-//            newRecipeDTO = newRecipes.get(0);
-//        } else {
-//            List<SpoonacularRecipeDTO> newRecipes = spoonacularClient.getRandomRecipes(1);
-//            newRecipeDTO = newRecipes.get(0);
-//        }
-//
-//        Recipe newRecipe = getOrSaveRecipe(newRecipeDTO);
-//
-//        mealPlan.getRecipes().set(index, newRecipe);
-//
-//        return mealPlanRepository.save(mealPlan);
-//    }
-
     @Transactional
     public MealPlan replaceRecipe(Long mealPlanId, Long recipeId) {
 
@@ -267,5 +229,4 @@ public class MealPlanService {
 
         return mealPlanRepository.save(mealPlan);
     }
-
 }

@@ -13,11 +13,4 @@ import java.util.Optional;
 public interface RecipeRepository extends JpaRepository<Recipe,Long> {
 
     Optional<Recipe> findByExternalId(Long externalId);
-
-//    @Query("SELECT r FROM Recipe r JOIN r.categories c WHERE c.name = :name")
-//    List<Recipe> findByCategoryName(@Param("name") String categoryName);
-//
-//    //List<Recipe> findByCaloriesBetween(int min, int max);
-//
-//    Optional<Recipe> findByName(String name);
 }

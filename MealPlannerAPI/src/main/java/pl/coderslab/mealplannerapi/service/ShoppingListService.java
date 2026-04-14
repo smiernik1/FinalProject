@@ -38,8 +38,7 @@ public class ShoppingListService {
         return mapToDto(shoppingList);
     }
 
-    @Transactional
-    protected ShoppingList createShoppingList(MealPlan mealPlan) {
+    private ShoppingList createShoppingList(MealPlan mealPlan) {
         Map<String, BigDecimal> totals = new LinkedHashMap<>();
 
         for (MealPlanRecipe mealPlanRecipe : mealPlan.getMealPlanRecipes()) {
@@ -77,9 +76,9 @@ public class ShoppingListService {
         return shoppingListRepository.save(shoppingList);
     }
 
-    public ShoppingListResponseDTO getShoppingListById(Long Id) {
-        ShoppingList shoppingList = shoppingListRepository.findById(Id)
-                .orElseThrow(() -> new RuntimeException("Can't find shoppingList with id: " + Id));
+    public ShoppingListResponseDTO getShoppingListById(Long id) {
+        ShoppingList shoppingList = shoppingListRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Can't find shoppingList with id: " + id));
         return mapToDto(shoppingList);
     }
 
@@ -101,9 +100,9 @@ public class ShoppingListService {
     }
 
     @Transactional
-    public ShoppingListResponseDTO updateShoppingList(Long Id, UpdateShoppingListRequestDTO request) {
-        ShoppingList shoppingList = shoppingListRepository.findById(Id)
-                .orElseThrow(() -> new RuntimeException("Can't find shoppingList with id: " + Id));
+    public ShoppingListResponseDTO updateShoppingList(Long id, UpdateShoppingListRequestDTO request) {
+        ShoppingList shoppingList = shoppingListRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Can't find shoppingList with id: " + id));
 
         shoppingList.getItems().clear();
 
@@ -129,7 +128,7 @@ public class ShoppingListService {
         if (mealPlan != null) {
             mealPlan.setShoppingListGenerated(false);
             mealPlanRepository.save(mealPlan);
-            shoppingListRepository.deleteById(id);
         }
+        shoppingListRepository.deleteById(id);
     }
 }

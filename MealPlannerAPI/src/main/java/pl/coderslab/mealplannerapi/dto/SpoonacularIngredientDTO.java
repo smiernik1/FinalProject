@@ -17,5 +17,4 @@ public class SpoonacularIngredientDTO {
     private String name;
     private BigDecimal amount;
     private String unit;
-
 }

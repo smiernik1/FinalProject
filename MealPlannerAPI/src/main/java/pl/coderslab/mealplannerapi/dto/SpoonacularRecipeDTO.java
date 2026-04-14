@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -14,14 +15,14 @@ import java.util.List;
 public class SpoonacularRecipeDTO {
     private Long id;
     private String title;
-    String image;
-    String sourceUrl;
-    Integer readyInMinutes;
-    Integer servings;
+    private String image;
+    private String sourceUrl;
+    private Integer readyInMinutes;
+    private Integer servings;
 
     private NutritionDTO nutrition;
 
-    List<SpoonacularIngredientDTO> extendedIngredients;
+    private List<SpoonacularIngredientDTO> extendedIngredients =  new ArrayList<>();
 }
 
 

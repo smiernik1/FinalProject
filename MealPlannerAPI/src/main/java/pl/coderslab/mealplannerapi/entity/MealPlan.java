@@ -20,20 +20,14 @@ public class MealPlan {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(nullable = false)
     private LocalDate startDate;
+
+    @Column(nullable = false)
     private Integer daysCount;
 
-    //Relacja @ManyToMany z Recipe
-//    @ManyToMany
-//    @JoinTable(
-//            name = "mealplan_recipe",
-//            joinColumns = @JoinColumn(name = "mealplan_id"),
-//            inverseJoinColumns = @JoinColumn(name = "recipe_id")
-//    )
-//    private List<Recipe> recipes = new ArrayList<>();
-
     @OneToMany(mappedBy = "mealPlan", cascade = CascadeType.ALL, orphanRemoval = true)
-    //@JsonIgnore
     private List<MealPlanRecipe> mealPlanRecipes =  new ArrayList<>();
 
     public void addRecipe(Recipe recipe, int day, String dishType) {
@@ -46,7 +40,8 @@ public class MealPlan {
         mealPlanRecipes.add(mpr);
     }
 
-    private boolean shoppingListGenerated;
+    @Column(nullable = false)
+    private boolean shoppingListGenerated = false;
 
     private String diet;
     private Integer minCalories;

@@ -1,4 +1,4 @@
-package pl.coderslab.mealplannerapi;
+package pl.coderslab.mealplannerapi.spoonacular;
 
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;

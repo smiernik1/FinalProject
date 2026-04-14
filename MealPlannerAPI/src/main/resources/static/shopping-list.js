@@ -114,6 +114,10 @@ async function saveShoppingList() {
     try {
         const items = collectItemsFromForm();
 
+        if (!items) {
+            return;
+        }
+
         const payload = {
             items: items
         };
@@ -154,9 +158,21 @@ function collectItemsFromForm() {
         const name = row.querySelector(".item-name").value.trim();
         const amountValue = row.querySelector(".item-amount").value;
         const unit = row.querySelector(".item-unit").value.trim();
+        const amount = Number(amountValue);
 
         if (!name) {
-            return;
+            alert("Nazwa produktu nie może być pusta");
+            return null;
+        }
+
+        if (!unit) {
+            alert(`Podaj jednostkę dla: ${name}`);
+            return null;
+        }
+
+        if (!amountValue || isNaN(amount) || amount <= 0) {
+            alert(`Niepoprawna ilość dla: ${name}`);
+            return null;
         }
 
         items.push({

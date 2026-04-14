@@ -13,6 +13,7 @@ const shoppingListSection = document.getElementById("shopping-list-section");
 const shoppingList = document.getElementById("shopping-list");
 const shoppingListButton = document.getElementById("shopping-list-button");
 const editShoppingListButton = document.getElementById("edit-shopping-list-button");
+const deleteShoppingListButton = document.getElementById("delete-shopping-list-button");
 const downloadShoppingListButton = document.getElementById("download-shopping-list-button");
 
 const loadMealPlansButton = document.getElementById("load-meal-plans-button");
@@ -77,11 +78,11 @@ form.addEventListener("submit", async (event) => {
         return;
     }
 
-    if (minCalories <= 0) {
+    if (minCalories !== null && minCalories <= 0) {
         alert("Min kalorii musi być większe od 0");
         return;
     }
-    if (maxCalories <= minCalories) {
+    if (maxCalories !== null && minCalories !== null && maxCalories <= minCalories) {
         alert("Max kolorii musi być większe od min");
         return;
     }
@@ -467,7 +468,10 @@ async function deleteMealPlan(id) {
             currentMealPlan = null;
         }
 
-        loadMealPlansButton.click();
+        if (mealPlansVisible) {
+            const mealPlans = await loadMealPlans();
+            renderMealPlansList(mealPlans);
+        }
 
         messageEl.textContent = "Meal plan został usunięty.";
     } catch (error) {
@@ -476,11 +480,48 @@ async function deleteMealPlan(id) {
     }
 }
 
+async function deleteShoppingList(id) {
+    const confirmDelete = confirm("Czy na pewno chcesz usunąć tą listę zakupów?");
+
+    if (!confirmDelete) return;
+
+    try {
+        const response = await fetch(`/api/shopping-lists/${id}`, {
+            method: "DELETE"
+        });
+
+        if (!response.ok) {
+            throw new Error("Nie udało się usunąć listy zakupów.");
+        }
+
+        if (currentShoppingListId === id) {
+            shoppingListSection.classList.add("hidden");
+        }
+
+        if (mealPlansVisible) {
+            const mealPlans = await loadMealPlans();
+            renderMealPlansList(mealPlans);
+        }
+
+        messageEl.textContent = "Lista zakupów została usunięta.";
+    } catch (error) {
+        console.error(error);
+        messageEl.textContent = "Błąd podczas usuwania listy zakupów.";
+    }
+}
+
 editShoppingListButton.addEventListener("click", () => {
     if (!currentShoppingListId) {
         return;
     }
     window.location.href = `/shopping-list.html?id=${currentShoppingListId}`;
+})
+
+deleteShoppingListButton.addEventListener("click", () => {
+    if (!currentShoppingListId) {
+        return;
+    }
+    deleteShoppingList(currentShoppingListId);
 })
 
 downloadShoppingListButton.addEventListener("click", () => {
