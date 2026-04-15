@@ -17,27 +17,31 @@ document.addEventListener("DOMContentLoaded", () => {
         shoppingListMessage.textContent = "Brak id listy zakupów w adresie URL.";
         return;
     }
-
     loadShoppingList();
 });
 
+// PRZYCISK DODAJ
 addItemButton.addEventListener("click", () => {
     addItemRow({ name: "", amount: "", unit: "" });
 });
 
+// PRZYCISK ZAPISZ
 saveButton.addEventListener("click", async () => {
     await saveShoppingList();
 });
 
+// PRZYCISK ZAPISZ I WYJDŹ
 saveAndExitButton.addEventListener("click", async () => {
     await saveShoppingList();
     window.location.href = "/";
 })
 
+// PRZYCISK WYJDŹ BEZ ZAPISYWANIA
 cancelButton.addEventListener("click", () => {
     window.location.href = "/";
 });
 
+// ZAŁADOWANIE LISTY ZAKUPÓW
 async function loadShoppingList() {
     try {
         shoppingListMessage.textContent = "Ładowanie listy zakupów...";
@@ -78,6 +82,7 @@ function renderShoppingListEditor(shoppingList) {
     items.forEach((item) => addItemRow(item));
 }
 
+// DODANIE WIERSZA W LIŚCIE
 function addItemRow(item = { name: "", amount: "", unit: "" }) {
     const row = document.createElement("div");
     row.className = "recipe-card shopping-item-row";
@@ -110,6 +115,7 @@ function addItemRow(item = { name: "", amount: "", unit: "" }) {
     itemsContainer.appendChild(row);
 }
 
+// ZAPISANIE LISTY
 async function saveShoppingList() {
     try {
         const items = collectItemsFromForm();
@@ -150,6 +156,7 @@ async function saveShoppingList() {
     }
 }
 
+// POBRANIE I WALIDACJA WARTOŚCI PODANYCH PRZEZ UŻYTKOWNIKA
 function collectItemsFromForm() {
     const rows = document.querySelectorAll(".shopping-item-row");
     const items = [];
@@ -185,6 +192,7 @@ function collectItemsFromForm() {
     return items;
 }
 
+// WYJŚCIE BEZ ZAPISU
 function escapeHtml(value) {
     return value
         .replaceAll("&", "&amp;")

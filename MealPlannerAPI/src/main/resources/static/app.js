@@ -27,40 +27,9 @@ let currentShoppingListId = null;
 const mealsPerDayInput = document.getElementById("mealsPerDay");
 const dishTypeCheckboxes = document.querySelectorAll('input[name="dishType"]');
 
-function getCheckedDishTypes() {
-    return Array.from(dishTypeCheckboxes)
-        .filter(cb => cb.checked)
-        .map(cb => cb.value);
-}
+// FORMULARZ
 
-function updateShoppingButton(mealPlan) {
-    const btn = document.getElementById("shopping-list-button");
-
-    btn.textContent = mealPlan.shoppingListGenerated
-        ? "Wyświetl listę zakupów"
-        : "Generuj listę zakupów";
-}
-
-async function loadMealPlans() {
-    const response = await fetch("/api/meal-plans/get/all");
-    if (!response.ok) throw new Error("Nie udało się pobrać meal planów.");
-
-    return await response.json();
-}
-
-dishTypeCheckboxes.forEach(cb => {
-    cb.addEventListener("change", () => {
-
-        const max = parseInt(mealsPerDayInput.value || 0);
-        const checked = getCheckedDishTypes();
-
-        if (checked.length > max) {
-            cb.checked = false;
-            alert(`Możesz wybrać tylko ${max} typy posiłków`);
-        }
-    });
-});
-
+// GENEROWANIE MEAL PLANU
 form.addEventListener("submit", async (event) => {
     event.preventDefault();
 
@@ -134,41 +103,123 @@ form.addEventListener("submit", async (event) => {
     }
 });
 
-shoppingListButton.addEventListener("click", async () => {
-    if (!currentMealPlanId) {
+// CHECKBOX DISH TYPE
+function getCheckedDishTypes() {
+    return Array.from(dishTypeCheckboxes)
+        .filter(cb => cb.checked)
+        .map(cb => cb.value);
+}
+
+// WALIDACJA CHECKBOX DISH TYPE
+dishTypeCheckboxes.forEach(cb => {
+    cb.addEventListener("change", () => {
+
+        const max = parseInt(mealsPerDayInput.value || 0);
+        const checked = getCheckedDishTypes();
+
+        if (checked.length > max) {
+            cb.checked = false;
+            alert(`Możesz wybrać tylko ${max} typy posiłków`);
+        }
+    });
+});
+
+//MEAL PLANY
+
+// PRZYCISK WYŚWIETLANIA MEAL PLANÓW
+loadMealPlansButton.addEventListener("click", async () => {
+    if (mealPlansVisible) {
+
+        mealPlansList.innerHTML = "";
+        mealPlansVisible = false;
+        loadMealPlansButton.textContent = "Pokaż zapisane meal plany";
         return;
     }
 
     try {
-        const response = await fetch(`/api/meal-plans/${currentMealPlanId}/shopping-list`, {
-            method: "POST"
-        });
+        const mealPlans = await loadMealPlans();
+        renderMealPlansList(mealPlans);
 
-        if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(errorText || "Nie udało się pobrać listy zakupów.");
-        }
-
-        const shoppingListResponse = await response.json();
-        currentShoppingListId = shoppingListResponse.id;
-        renderShoppingList(shoppingListResponse);
-        // updateShoppingButton(mealPlan);
-
-        currentMealPlan.shoppingListGenerated = true;
-        updateShoppingButton(currentMealPlan);
-
-        if (mealPlansVisible) {
-            const mealPlans = await loadMealPlans();
-            renderMealPlansList(mealPlans);
-        }
-
+        mealPlansVisible = true;
+        loadMealPlansButton.textContent = "Ukryj meal plany";
     } catch (error) {
         console.error(error);
-        shoppingList.innerHTML = "<p>Błąd podczas pobierania listy zakupów.</p>";
-        shoppingListSection.classList.remove("hidden");
+        mealPlansList.innerHTML = "<p>Błąd podczas pobierania meal planów.</p>";
     }
 });
 
+// ZAŁADOWANIE LISTY ISTNIEJĄCYCH MEAL PLANÓW
+async function loadMealPlans() {
+    const response = await fetch("/api/meal-plans/get/all");
+    if (!response.ok) throw new Error("Nie udało się pobrać meal planów.");
+
+    return await response.json();
+}
+
+// WYŚWIETLANIE LISTY MEAL PLANÓW
+function renderMealPlansList(mealPlans) {
+    mealPlansList.innerHTML = "";
+
+    if (!mealPlans || mealPlans.length === 0) {
+        mealPlansList.innerHTML = "<p>Brak zapisanych meal planów.</p>";
+        return;
+    }
+
+    mealPlans.forEach(plan => {
+        const div = document.createElement("div");
+        div.className = "meal-plan-card";
+
+        div.innerHTML = `
+            <p><strong>ID:</strong> ${plan.id}</p>
+            <p><strong>Liczba dni:</strong> ${plan.daysCount ?? "-"}</p>
+            <p><strong>Lista zakupów:</strong>${plan.shoppingListGenerated ? "✔" : "❌"}</p>
+            <button data-id="${plan.id}" class="show-btn">Pokaż</button>
+            <button data-id="${plan.id}" class="delete-btn">Usuń</button>
+        `;
+
+        const showButton = div.querySelector(".show-btn");
+        const deleteButton = div.querySelector(".delete-btn");
+
+        // PRZYCISK POKAŻ MEAL PLAN
+        showButton.addEventListener("click", () => {
+            fetchMealPlanById(plan.id);
+        });
+
+        // PRZYCISK USUŃ MEAL PLAN
+        deleteButton.addEventListener("click", () => {
+            deleteMealPlan(plan.id);
+        });
+
+        mealPlansList.appendChild(div);
+    });
+}
+
+// POKAŻ MEAL PLAN
+async function fetchMealPlanById(id) {
+    try {
+        const response = await fetch(`/api/meal-plans/get/${id}`);
+
+        if (!response.ok) {
+            throw new Error("Nie udało się pobrać meal planu.");
+        }
+
+        const mealPlan = await response.json();
+
+        currentMealPlan = mealPlan;
+        currentMealPlanId = mealPlan.id;
+
+        renderMealPlan(mealPlan);
+
+        recipeDetailsSection.classList.add("hidden");
+        shoppingListSection.classList.add("hidden");
+
+    } catch (error) {
+        console.error(error);
+        messageEl.textContent = "Błąd podczas pobierania meal planu.";
+    }
+}
+
+// SZCZEGÓŁY MEAL PLANU
 function renderMealPlan(mealPlan) {
     mealPlanSection.classList.remove("hidden");
 
@@ -235,9 +286,11 @@ function renderMealPlan(mealPlan) {
                 </div>
             `;
 
+                // PRZYCISK SZCZEGÓŁY PRZEPISU
                 recipeCard.querySelector(".details-btn")
                     .addEventListener("click", () => fetchRecipeDetails(recipe.id));
 
+                // PRZYCISK ZMIEŃ PRZEPIS
                 const replaceBtn = recipeCard.querySelector(".replace-btn");
                 if (replaceBtn) {
                     replaceBtn.addEventListener("click", () => replaceRecipe(recipe.id));
@@ -249,38 +302,42 @@ function renderMealPlan(mealPlan) {
     updateShoppingButton(mealPlan);
 }
 
-async function replaceRecipe(recipeId) {
-    if (!currentMealPlanId) return;
+// USUWANIE MEAL PLANU
+async function deleteMealPlan(id) {
+    const confirmDelete = confirm("Czy na pewno chcesz usunąć ten meal plan?");
+
+    if (!confirmDelete) return;
 
     try {
-        messageEl.textContent = "Podmienianie przepisu...";
-
-        const response = await fetch(
-            `/api/meal-plans/${currentMealPlanId}/replace-recipe/${recipeId}`,
-            {
-                method: "POST"
-            }
-        );
+        const response = await fetch(`/api/meal-plans/delete/${id}`, {
+            method: "DELETE"
+        });
 
         if (!response.ok) {
-            throw new Error("Nie udało się podmienić przepisu.");
+            throw new Error("Nie udało się usunąć meal planu.");
         }
 
-        const updatedMealPlan = await response.json();
+        if (currentMealPlanId === id) {
+            mealPlanSection.classList.add("hidden");
+            recipeDetailsSection.classList.add("hidden");
+            shoppingListSection.classList.add("hidden");
+            currentMealPlanId = null;
+            currentMealPlan = null;
+        }
 
-        currentMealPlan = updatedMealPlan;
+        if (mealPlansVisible) {
+            const mealPlans = await loadMealPlans();
+            renderMealPlansList(mealPlans);
+        }
 
-        renderMealPlan(updatedMealPlan);
-
-        recipeDetailsSection.classList.add("hidden");
-
-        messageEl.textContent = "Przepis został podmieniony.";
+        messageEl.textContent = "Meal plan został usunięty.";
     } catch (error) {
         console.error(error);
-        messageEl.textContent = "Błąd podczas podmiany przepisu.";
+        messageEl.textContent = "Błąd podczas usuwania meal planu.";
     }
 }
 
+// WYŚWIETLANIE SZCZEGÓŁÓW PRZEPISÓW
 async function fetchRecipeDetails(recipeId) {
     try {
         const response = await fetch(`/api/recipes/get/${recipeId}`);
@@ -300,6 +357,7 @@ async function fetchRecipeDetails(recipeId) {
     }
 }
 
+// SZCZEGÓŁY PRZEPISÓW
 function renderRecipeDetails(recipe) {
     recipeDetailsSection.classList.remove("hidden");
 
@@ -348,6 +406,84 @@ function renderRecipeDetails(recipe) {
     ;
 }
 
+// ZMIANA PRZEPISU
+async function replaceRecipe(recipeId) {
+    if (!currentMealPlanId) return;
+
+    try {
+        messageEl.textContent = "Podmienianie przepisu...";
+
+        const response = await fetch(
+            `/api/meal-plans/${currentMealPlanId}/replace-recipe/${recipeId}`,
+            {
+                method: "POST"
+            }
+        );
+
+        if (!response.ok) {
+            throw new Error("Nie udało się podmienić przepisu.");
+        }
+
+        const updatedMealPlan = await response.json();
+
+        currentMealPlan = updatedMealPlan;
+
+        renderMealPlan(updatedMealPlan);
+
+        recipeDetailsSection.classList.add("hidden");
+
+        messageEl.textContent = "Przepis został podmieniony.";
+    } catch (error) {
+        console.error(error);
+        messageEl.textContent = "Błąd podczas podmiany przepisu.";
+    }
+}
+
+// PRZYCISK LISTA ZAKUPÓW
+shoppingListButton.addEventListener("click", async () => {
+    if (!currentMealPlanId) {
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/meal-plans/${currentMealPlanId}/shopping-list`, {
+            method: "POST"
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(errorText || "Nie udało się pobrać listy zakupów.");
+        }
+
+        const shoppingListResponse = await response.json();
+        currentShoppingListId = shoppingListResponse.id;
+        renderShoppingList(shoppingListResponse);
+        // updateShoppingButton(mealPlan);
+
+        currentMealPlan.shoppingListGenerated = true;
+        updateShoppingButton(currentMealPlan);
+
+        if (mealPlansVisible) {
+            const mealPlans = await loadMealPlans();
+            renderMealPlansList(mealPlans);
+        }
+
+    } catch (error) {
+        console.error(error);
+        shoppingList.innerHTML = "<p>Błąd podczas pobierania listy zakupów.</p>";
+        shoppingListSection.classList.remove("hidden");
+    }
+});
+
+// GENERUJ LISTĘ ZAKUPÓW / WYŚWIETL LISTĘ ZAKUPÓW
+function updateShoppingButton(mealPlan) {
+    const btn = document.getElementById("shopping-list-button");
+
+    btn.textContent = mealPlan.shoppingListGenerated
+        ? "Wyświetl listę zakupów"
+        : "Generuj listę zakupów";
+}
+
 function renderShoppingList(shoppingListResponse) {
     shoppingListSection.classList.remove("hidden");
 
@@ -366,120 +502,29 @@ function renderShoppingList(shoppingListResponse) {
 
 }
 
-loadMealPlansButton.addEventListener("click", async () => {
-    if (mealPlansVisible) {
-
-        mealPlansList.innerHTML = "";
-        mealPlansVisible = false;
-        loadMealPlansButton.textContent = "Pokaż zapisane meal plany";
+// PRZYCISKI SHOPPING-LIST-SECTION (EDYTUJ, USUŃ, POBIERZ)
+editShoppingListButton.addEventListener("click", () => {
+    if (!currentShoppingListId) {
         return;
     }
+    window.location.href = `/shopping-list.html?id=${currentShoppingListId}`;
+})
 
-    try {
-        const mealPlans = await loadMealPlans();
-        renderMealPlansList(mealPlans);
-
-        mealPlansVisible = true;
-        loadMealPlansButton.textContent = "Ukryj meal plany";
-    } catch (error) {
-        console.error(error);
-        mealPlansList.innerHTML = "<p>Błąd podczas pobierania meal planów.</p>";
-    }
-});
-
-function renderMealPlansList(mealPlans) {
-    mealPlansList.innerHTML = "";
-
-    if (!mealPlans || mealPlans.length === 0) {
-        mealPlansList.innerHTML = "<p>Brak zapisanych meal planów.</p>";
+deleteShoppingListButton.addEventListener("click", () => {
+    if (!currentShoppingListId) {
         return;
     }
+    deleteShoppingList(currentShoppingListId);
+})
 
-    mealPlans.forEach(plan => {
-        const div = document.createElement("div");
-        div.className = "meal-plan-card";
-
-        div.innerHTML = `
-            <p><strong>ID:</strong> ${plan.id}</p>
-            <p><strong>Liczba dni:</strong> ${plan.daysCount ?? "-"}</p>
-            <p><strong>Lista zakupów:</strong>${plan.shoppingListGenerated ? "✔" : "❌"}</p>
-            <button data-id="${plan.id}" class="show-btn">Pokaż</button>
-            <button data-id="${plan.id}" class="delete-btn">Usuń</button>
-        `;
-
-        const showButton = div.querySelector(".show-btn");
-        const deleteButton = div.querySelector(".delete-btn");
-
-        showButton.addEventListener("click", () => {
-            fetchMealPlanById(plan.id);
-        });
-
-        deleteButton.addEventListener("click", () => {
-            deleteMealPlan(plan.id);
-        });
-
-        mealPlansList.appendChild(div);
-    });
-}
-
-async function fetchMealPlanById(id) {
-    try {
-        const response = await fetch(`/api/meal-plans/get/${id}`);
-
-        if (!response.ok) {
-            throw new Error("Nie udało się pobrać meal planu.");
-        }
-
-        const mealPlan = await response.json();
-
-        currentMealPlan = mealPlan;
-        currentMealPlanId = mealPlan.id;
-
-        renderMealPlan(mealPlan);
-
-        recipeDetailsSection.classList.add("hidden");
-        shoppingListSection.classList.add("hidden");
-
-    } catch (error) {
-        console.error(error);
-        messageEl.textContent = "Błąd podczas pobierania meal planu.";
+downloadShoppingListButton.addEventListener("click", () => {
+    if (!currentShoppingListId) {
+        return;
     }
-}
+    alert("Funkcja pobierania jest w trakcie tworzenia")
+})
 
-async function deleteMealPlan(id) {
-    const confirmDelete = confirm("Czy na pewno chcesz usunąć ten meal plan?");
-
-    if (!confirmDelete) return;
-
-    try {
-        const response = await fetch(`/api/meal-plans/delete/${id}`, {
-            method: "DELETE"
-        });
-
-        if (!response.ok) {
-            throw new Error("Nie udało się usunąć meal planu.");
-        }
-
-        if (currentMealPlanId === id) {
-            mealPlanSection.classList.add("hidden");
-            recipeDetailsSection.classList.add("hidden");
-            shoppingListSection.classList.add("hidden");
-            currentMealPlanId = null;
-            currentMealPlan = null;
-        }
-
-        if (mealPlansVisible) {
-            const mealPlans = await loadMealPlans();
-            renderMealPlansList(mealPlans);
-        }
-
-        messageEl.textContent = "Meal plan został usunięty.";
-    } catch (error) {
-        console.error(error);
-        messageEl.textContent = "Błąd podczas usuwania meal planu.";
-    }
-}
-
+// USUWANIE LISTY ZAKUPÓW
 async function deleteShoppingList(id) {
     const confirmDelete = confirm("Czy na pewno chcesz usunąć tą listę zakupów?");
 
@@ -509,24 +554,3 @@ async function deleteShoppingList(id) {
         messageEl.textContent = "Błąd podczas usuwania listy zakupów.";
     }
 }
-
-editShoppingListButton.addEventListener("click", () => {
-    if (!currentShoppingListId) {
-        return;
-    }
-    window.location.href = `/shopping-list.html?id=${currentShoppingListId}`;
-})
-
-deleteShoppingListButton.addEventListener("click", () => {
-    if (!currentShoppingListId) {
-        return;
-    }
-    deleteShoppingList(currentShoppingListId);
-})
-
-downloadShoppingListButton.addEventListener("click", () => {
-    if (!currentShoppingListId) {
-        return;
-    }
-    alert("Funkcja pobierania jest w trakcie tworzenia")
-})
