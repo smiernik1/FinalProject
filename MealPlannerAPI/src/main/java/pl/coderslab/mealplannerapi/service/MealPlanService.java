@@ -4,33 +4,24 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pl.coderslab.mealplannerapi.SpoonacularClient;
 import pl.coderslab.mealplannerapi.dto.CreateMealPlanRequestDTO;
-import pl.coderslab.mealplannerapi.dto.ShoppingListItemDTO;
-import pl.coderslab.mealplannerapi.dto.SpoonacularIngredientDTO;
 import pl.coderslab.mealplannerapi.dto.SpoonacularRecipeDTO;
 import pl.coderslab.mealplannerapi.entity.*;
-import pl.coderslab.mealplannerapi.repository.IngredientRepository;
 import pl.coderslab.mealplannerapi.repository.MealPlanRepository;
-import pl.coderslab.mealplannerapi.repository.RecipeRepository;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class MealPlanService {
     private final MealPlanRepository mealPlanRepository;
     private final SpoonacularClient spoonacularClient;
     private final RecipeService recipeService;
-    private final ShoppingListService shoppingListService;
 
-    public MealPlanService(MealPlanRepository mealPlanRepository, SpoonacularClient spoonacularClient, RecipeRepository recipeRepository, IngredientRepository ingredientRepository, RecipeService recipeService, ShoppingListService shoppingListService, ShoppingListService shoppingListService1) {
+    public MealPlanService(MealPlanRepository mealPlanRepository, SpoonacularClient spoonacularClient, RecipeService recipeService) {
         this.mealPlanRepository = mealPlanRepository;
         this.spoonacularClient = spoonacularClient;
         this.recipeService = recipeService;
-        this.shoppingListService = shoppingListService1;
     }
 
     @Transactional
@@ -39,8 +30,9 @@ public class MealPlanService {
         List<SpoonacularRecipeDTO> spoonacularRecipeDTO = new ArrayList<>();
 
         for (String dishType : dishTypes) {
-            if (request.getDiet() != null && !request.getDiet().isEmpty()) {
-                spoonacularRecipeDTO.addAll(spoonacularClient.getRandomRecipesByDiets(request.getDiet(), request.getDaysCount(), dishType));
+//            if (request.getDiet() != null && !request.getDiet().isEmpty()) {
+            if (request.getDiet() != null && request.getDiet() != Diet.NONE) {
+                spoonacularRecipeDTO.addAll(spoonacularClient.getRandomRecipesByDiets(request.getDiet().getValue(), request.getDaysCount(), dishType));
             } else {
                 spoonacularRecipeDTO.addAll(spoonacularClient.getRandomRecipes(request.getDaysCount(), dishType));
             }
@@ -59,7 +51,7 @@ public class MealPlanService {
 
         int index = 0;
 
-        for (int i = 0; i <recipes.size(); i++) {
+        for (int i = 0; i < recipes.size(); i++) {
             Recipe recipe = recipes.get(i);
             int day = (index % request.getDaysCount()) + 1;
             String dishType = dishTypes.get(i / request.getDaysCount());
@@ -123,9 +115,10 @@ public class MealPlanService {
 
         List<SpoonacularRecipeDTO> results;
 
-        if (mealPlan.getDiet() != null && !mealPlan.getDiet().isBlank()) {
+//        if (mealPlan.getDiet() != null && !mealPlan.getDiet().isBlank()) {
+        if (mealPlan.getDiet() != null && mealPlan.getDiet() != Diet.NONE) {
             results = spoonacularClient.getRandomRecipesByDiets(
-                    mealPlan.getDiet(),
+                    mealPlan.getDiet().getValue(),
                     1,
                     dishType
             );

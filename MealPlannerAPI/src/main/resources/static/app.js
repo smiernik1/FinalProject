@@ -223,11 +223,21 @@ async function fetchMealPlanById(id) {
 function renderMealPlan(mealPlan) {
     mealPlanSection.classList.remove("hidden");
 
+    const DIET_LABELS = {
+        VEGAN: "Wegańska",
+        VEGETARIAN: "Wegetariańska",
+        GLUTEN_FREE: "Bezglutenowa",
+        DAIRY_FREE: "Bez nabiału",
+        NONE: "Brak"
+    };
+
+    const dietLabel = DIET_LABELS [mealPlan.diet];
+
     mealPlanInfo.innerHTML = `
         <p><strong>ID meal planu:</strong> ${mealPlan.id}</p>
         <p><strong>Liczba dni:</strong> ${mealPlan.daysCount ?? "-"}</p>
         <p><strong>Liczba przepisów:</strong> ${mealPlan.mealPlanRecipes ? mealPlan.mealPlanRecipes.length : 0}</p>
-        <p><strong>Dieta:</strong> ${mealPlan.diet || "brak"}</p>
+        <p><strong>Dieta:</strong> ${dietLabel}</p>
     `;
 
     recipesList.innerHTML = "";

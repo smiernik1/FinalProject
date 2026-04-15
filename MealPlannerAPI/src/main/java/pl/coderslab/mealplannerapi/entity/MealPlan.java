@@ -43,7 +43,9 @@ public class MealPlan {
     @Column(nullable = false)
     private boolean shoppingListGenerated = false;
 
-    private String diet;
+    //private String diet;
+    @Enumerated(EnumType.STRING)
+    private Diet diet;
     private Integer minCalories;
     private Integer maxCalories;
 }

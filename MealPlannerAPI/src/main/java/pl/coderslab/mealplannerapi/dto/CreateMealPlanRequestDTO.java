@@ -9,6 +9,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.*;
+import pl.coderslab.mealplannerapi.entity.Diet;
 import pl.coderslab.mealplannerapi.entity.MealPlan;
 import pl.coderslab.mealplannerapi.entity.MealPlanRecipe;
 
@@ -30,7 +31,8 @@ public class CreateMealPlanRequestDTO {
     @Max(value = 8, message = "mealPerDay must be at most 8")
     private Integer mealPerDay;
 
-    private String diet;
+    //private String diet;
+    private Diet diet;
 
     @Positive(message = "minCalories must be positive")
     private Integer minCalories;
