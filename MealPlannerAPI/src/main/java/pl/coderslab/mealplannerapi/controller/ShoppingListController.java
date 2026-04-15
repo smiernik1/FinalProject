@@ -4,8 +4,6 @@ import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 import pl.coderslab.mealplannerapi.dto.ShoppingListResponseDTO;
 import pl.coderslab.mealplannerapi.dto.UpdateShoppingListRequestDTO;
-import pl.coderslab.mealplannerapi.entity.ShoppingList;
-import pl.coderslab.mealplannerapi.repository.ShoppingListRepository;
 import pl.coderslab.mealplannerapi.service.ShoppingListService;
 
 @RestController
@@ -35,7 +33,7 @@ public class ShoppingListController {
     }
 
     @DeleteMapping("/shopping-lists/{id}")
-    public void updateShoppingList(@PathVariable Long id) {
+    public void deleteShoppingList(@PathVariable Long id) {
         shoppingListService.deleteShoppingList(id);
     }
 }

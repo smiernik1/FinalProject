@@ -212,7 +212,7 @@ function renderMealPlan(mealPlan) {
             recipesList.appendChild(dayHeader);
 
             if (mealPlan.minCalories != null && totalCalories < mealPlan.minCalories) {
-                dayHeader.textContent += ` <span class="calorie-warning">⚠️ Kalorie poniżej limitu (${mealPlan.minCalories} kcal)</span>`;
+                dayHeader.innerHTML += ` <span class="calorie-warning">⚠️ Kalorie poniżej limitu (${mealPlan.minCalories} kcal)</span>`;
             }
 
             if (mealPlan.maxCalories != null && totalCalories > mealPlan.maxCalories) {

@@ -39,11 +39,6 @@ public class MealPlanController {
         mealPlanService.deleteMealPlanById(id);
     }
 
-    @GetMapping("/get/shopping-list/{id}")
-    public List<ShoppingListItemDTO> getShoppingList(@PathVariable Long id) {
-        return mealPlanService.getShoppingList(id);
-    }
-
     @PostMapping("/{mealPlanId}/replace-recipe/{recipeId}")
     public MealPlan replaceRecipe(
             @PathVariable Long mealPlanId,

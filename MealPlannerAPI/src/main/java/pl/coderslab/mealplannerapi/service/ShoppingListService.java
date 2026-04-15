@@ -11,6 +11,7 @@ import pl.coderslab.mealplannerapi.repository.ShoppingListRepository;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,19 +40,8 @@ public class ShoppingListService {
     }
 
     private ShoppingList createShoppingList(MealPlan mealPlan) {
-        Map<String, BigDecimal> totals = new LinkedHashMap<>();
 
-        for (MealPlanRecipe mealPlanRecipe : mealPlan.getMealPlanRecipes()) {
-            Recipe recipe = mealPlanRecipe.getRecipe();
-            for (RecipeIngredient recipeIngredient : recipe.getRecipeIngredients()) {
-                String ingredientName = recipeIngredient.getIngredient().getName();
-                String unit = recipeIngredient.getUnit();
-                BigDecimal amount = recipeIngredient.getAmount();
-
-                String key = ingredientName + ", " + unit;
-                totals.put(key, totals.getOrDefault(key, BigDecimal.ZERO).add(amount));
-            }
-        }
+        Map<String, BigDecimal> totals = calculateTotals(mealPlan);
 
         ShoppingList shoppingList = ShoppingList.builder()
                 .mealPlan(mealPlan)
@@ -74,6 +64,24 @@ public class ShoppingListService {
         }
         mealPlan.setShoppingListGenerated(true);
         return shoppingListRepository.save(shoppingList);
+    }
+
+    private Map<String, BigDecimal> calculateTotals(MealPlan mealPlan) {
+        Map<String, BigDecimal> totals = new LinkedHashMap<>();
+
+        for (MealPlanRecipe mealPlanRecipe : mealPlan.getMealPlanRecipes()) {
+            Recipe recipe = mealPlanRecipe.getRecipe();
+            for (RecipeIngredient recipeIngredient : recipe.getRecipeIngredients()) {
+                String ingredientName = recipeIngredient.getIngredient().getName();
+                String unit = recipeIngredient.getUnit();
+                BigDecimal amount = recipeIngredient.getAmount();
+
+                String key = ingredientName + ", " + unit;
+                totals.put(key, totals.getOrDefault(key, BigDecimal.ZERO).add(amount));
+            }
+        }
+
+        return totals;
     }
 
     public ShoppingListResponseDTO getShoppingListById(Long id) {

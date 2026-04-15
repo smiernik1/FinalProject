@@ -23,14 +23,14 @@ import java.util.Map;
 public class MealPlanService {
     private final MealPlanRepository mealPlanRepository;
     private final SpoonacularClient spoonacularClient;
-    private final RecipeRepository recipeRepository;
-    private final IngredientRepository ingredientRepository;
+    private final RecipeService recipeService;
+    private final ShoppingListService shoppingListService;
 
-    public MealPlanService(MealPlanRepository mealPlanRepository, SpoonacularClient spoonacularClient, RecipeRepository recipeRepository, IngredientRepository ingredientRepository) {
+    public MealPlanService(MealPlanRepository mealPlanRepository, SpoonacularClient spoonacularClient, RecipeRepository recipeRepository, IngredientRepository ingredientRepository, RecipeService recipeService, ShoppingListService shoppingListService, ShoppingListService shoppingListService1) {
         this.mealPlanRepository = mealPlanRepository;
         this.spoonacularClient = spoonacularClient;
-        this.recipeRepository = recipeRepository;
-        this.ingredientRepository = ingredientRepository;
+        this.recipeService = recipeService;
+        this.shoppingListService = shoppingListService1;
     }
 
     @Transactional
@@ -49,7 +49,7 @@ public class MealPlanService {
         List<Recipe> recipes = new ArrayList<>();
 
         for (SpoonacularRecipeDTO recipeDTO : spoonacularRecipeDTO) {
-            Recipe recipe = getOrSaveRecipe(recipeDTO);
+            Recipe recipe = recipeService.getOrSaveRecipe(recipeDTO);
             recipes.add(recipe);
         }
 
@@ -80,58 +80,6 @@ public class MealPlanService {
         return mealPlanRepository.save(mealPlan);
     }
 
-    private Recipe getOrSaveRecipe(SpoonacularRecipeDTO spoonacularRecipeDTO) {
-        return recipeRepository.findByExternalId(spoonacularRecipeDTO.getId()).
-                orElseGet(() -> saveNewRecipe(spoonacularRecipeDTO));
-    }
-
-    private Recipe saveNewRecipe(SpoonacularRecipeDTO spoonacularRecipeDTO) {
-        Recipe recipe = Recipe.builder()
-                .externalId(spoonacularRecipeDTO.getId())
-                .name(spoonacularRecipeDTO.getTitle())
-                .imageUrl(spoonacularRecipeDTO.getImage())
-                .sourceUrl(spoonacularRecipeDTO.getSourceUrl())
-                .calories(extractCalories(spoonacularRecipeDTO))
-                .build();
-        if (spoonacularRecipeDTO.getExtendedIngredients() != null) {
-            for (SpoonacularIngredientDTO ingredientDTO : spoonacularRecipeDTO.getExtendedIngredients()) {
-
-                Ingredient ingredient = ingredientRepository
-                        .findByNameIgnoreCase(ingredientDTO.getName())
-                        .orElseGet(() -> ingredientRepository.save(
-                                Ingredient.builder()
-                                        .name(ingredientDTO.getName())
-                                        .build()
-                        ));
-
-                RecipeIngredient recipeIngredient = RecipeIngredient.builder()
-                        .ingredient(ingredient)
-                        .amount(ingredientDTO.getAmount() != null ? ingredientDTO.getAmount() : BigDecimal.ZERO)
-                        .unit(
-                                ingredientDTO.getUnit() != null && !ingredientDTO.getUnit().isBlank()
-                                        ? ingredientDTO.getUnit() : "-"
-                        )
-                        .build();
-
-                recipe.addRecipeIngredient(recipeIngredient);
-            }
-        }
-
-        return recipeRepository.save(recipe);
-    }
-
-    private Integer extractCalories(SpoonacularRecipeDTO dto) {
-        if (dto.getNutrition() == null || dto.getNutrition().getNutrients() == null) {
-            return null;
-        }
-
-        return dto.getNutrition().getNutrients().stream()
-                .filter(n -> "Calories".equalsIgnoreCase(n.getName()))
-                .findFirst()
-                .map(n -> (int) Math.round(n.getAmount()))
-                .orElse(null);
-    }
-
     public List<MealPlan> getAllMealPlans() {
         return mealPlanRepository.findAll();
     }
@@ -147,35 +95,6 @@ public class MealPlanService {
             throw new RuntimeException("Can't find mealPlan with id: " + id);
         }
         mealPlanRepository.deleteById(id);
-    }
-
-    public List<ShoppingListItemDTO> getShoppingList(Long mealPlanId) {
-        MealPlan mealPlan = getMealPlanById(mealPlanId);
-
-        Map<String, BigDecimal> totals = new LinkedHashMap<>();
-
-        for (MealPlanRecipe mealPlanRecipe : mealPlan.getMealPlanRecipes()) {
-            Recipe recipe = mealPlanRecipe.getRecipe();
-            for (RecipeIngredient recipeIngredient : recipe.getRecipeIngredients()) {
-                String ingredientName = recipeIngredient.getIngredient().getName();
-                String unit = recipeIngredient.getUnit();
-                BigDecimal amount = recipeIngredient.getAmount();
-
-                String key = ingredientName + ", " + unit;
-                totals.put(key, totals.getOrDefault(key, BigDecimal.ZERO).add(amount));
-            }
-        }
-
-        List<ShoppingListItemDTO> shoppingList = new ArrayList<>();
-        for (Map.Entry<String, BigDecimal> entry : totals.entrySet()) {
-            String[] parts = entry.getKey().split(", ");
-            String ingredientName = parts[0];
-            String unit = parts[1];
-            BigDecimal amount = entry.getValue();
-
-            shoppingList.add(new ShoppingListItemDTO(ingredientName, amount, unit));
-        }
-        return shoppingList;
     }
 
     @Transactional
@@ -223,7 +142,7 @@ public class MealPlanService {
 
         SpoonacularRecipeDTO newRecipeDTO = results.get(0);
 
-        Recipe newRecipe = getOrSaveRecipe(newRecipeDTO);
+        Recipe newRecipe = recipeService.getOrSaveRecipe(newRecipeDTO);
 
         target.setRecipe(newRecipe);
 
