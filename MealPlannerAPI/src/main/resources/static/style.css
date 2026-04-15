@@ -1,0 +1,173 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f5f7fb;
+    color: #222;
+}
+
+.container {
+    max-width: 1050px;
+    margin: 0 auto;
+    padding: 32px 16px;
+}
+
+h1 {
+    margin-bottom: 8px;
+}
+
+.subtitle {
+    margin-top: 0;
+    color: #666;
+}
+
+.card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    margin-top: 20px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+}
+
+.hidden {
+    display: none;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+}
+
+.days-row {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: -10px;
+}
+
+.dish-types-row {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin-bottom: -15px;
+}
+
+.calories-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 15px;
+    margin-top: -5px;
+}
+
+.diet-row {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: -15px;
+}
+
+label {
+    display: block;
+    margin-bottom: 6px;
+    /*font-weight: bold;*/
+}
+
+input[type="number"] {
+    padding: 10px;
+    min-width: 120px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+}
+
+button {
+    padding: 10px 16px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    background: #2d6cdf;
+    color: white;
+    font-weight: bold;
+}
+
+button:hover {
+    opacity: 0.9;
+}
+
+#message {
+    margin-top: 12px;
+    font-weight: bold;
+}
+
+.recipe-card {
+    border: 1px solid #e3e6eb;
+    border-radius: 10px;
+    padding: 16px;
+    margin-top: 12px;
+    background: #fafafa;
+}
+
+.recipe-card h3 {
+    margin-top: 0;
+    margin-bottom: 8px;
+}
+
+.recipe-meta {
+    color: #666;
+    font-size: 14px;
+    margin-bottom: 10px;
+}
+
+.recipe-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.recipe-details-list,
+.shopping-list-items {
+    padding-left: 20px;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.recipe-image {
+    margin: 10px 0;
+    text-align: center;
+}
+
+.recipe-image img {
+    max-width: 100%;
+    max-height: 250px;
+    border-radius: 10px;
+    object-fit: cover;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+#meal-plans-list {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+}
+.meal-plan-card {
+    padding: 10px;
+    border-radius: 10px;
+    background: #f5f5f5;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+.calorie-warning {
+    color: red;
+    font-weight: normal;
+}
